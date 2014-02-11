@@ -62,28 +62,51 @@ namespace DealAlert
 
         private void worker_UpdateUI(object sender, RunWorkerCompletedEventArgs e)
         {
-            if ((parser.DateDernierItem != DateDernierItem))
+            if ((parser.DateDernierItem.CompareTo(DateDernierItem) > 0))
             {
-                NotificationWindow window = new NotificationWindow("Nouveaux deals !");
+                List<DealabsItem> liste = parser.getNouveauxDeals(DateDernierItem);
+                // Si on a un filtre de défini, on boucle, sinon, on pop juste le nombre d'items nouveaux
+                string filtre = ConfigurationSettings.AppSettings["filtre"];
+                // On définit le message à comme étant le nombre de nouveaux deals
+                string message = liste.Count + " nouveaux deal(s) !";
+                // Si on a un filtre, on boucle
+                if (!string.IsNullOrEmpty(filtre))
+                {
+                    for (int i = 0; i < liste.Count; i++)
+                    {
+                        // Si on trouve un item, on définit le message comme étant le titre du deal
+                        if (liste.ElementAt(i).titre.Contains(filtre))
+                        {
+                            message = liste.ElementAt(i).titre;
+                        }
+                    }
+                }
+                // On affiche la notification
+                NotificationWindow window = new NotificationWindow(message);
                 window.Show();
             }
+            // On garde la sélection dans la liste
             int Selected = listBox1.SelectedIndex;
             listBox1.ItemsSource = parser.AlllistItems;
 
             if(Selected != -1)
                 listBox1.SelectedItem = listBox1.Items.GetItemAt(Selected);
 
+            // Et on met à jour le nombre d'items affichés
             lnNbItems.Content = listBox1.Items.Count + " élement(s).";
         }
 
         private void listBox1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Si une ligne est sélectionnée dans la liste, on initialise les champs avec la valeur du deal
             if (listBox1.SelectedIndex != -1)
             {
                 lbTitre.Content = parser.listItemsAffichee.ElementAt(listBox1.SelectedIndex).titre;
                 lbDate.Content = parser.listItemsAffichee.ElementAt(listBox1.SelectedIndex).date.ToString();
+                // On empêche aussi le clic sur le bouton "Ouvrir"
                 btnOuvrirUrl.IsEnabled = true;
             }
+            // Sinon, on vide les champs
             else
             {
                 btnOuvrirUrl.IsEnabled = false;
@@ -94,50 +117,41 @@ namespace DealAlert
 
         private void btnActualiser_Click(object sender, RoutedEventArgs e)
         {
+            // On change le curseur
             this.Cursor = System.Windows.Input.Cursors.Wait;
+            // On lance l'update
             parser.updateItems(false);
+            // Et on met à jour la vue
             this.listBox1.SelectedIndex = -1;
             listBox1.ItemsSource = parser.AlllistItems;
             this.Cursor = null;
             lnNbItems.Content = listBox1.Items.Count + " élement(s).";
         }
 
-        private void btnFiltre_Click(object sender, RoutedEventArgs e)
-        {
-            if (!string.IsNullOrEmpty(tbxFiltre.Text))
-            {
-                parser.filtrerItems(tbxFiltre.Text);    
-            }
-            this.listBox1.SelectedIndex = -1;
-            this.listBox1.ItemsSource = parser.listItemsFiltres;
-            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
-            tbxFiltre.Text = string.Empty;
-        }
-
-        private void button1_Click(object sender, RoutedEventArgs e)
-        {
-            parser.resetFiltre();
-            this.listBox1.SelectedIndex = -1;
-            listBox1.ItemsSource = parser.AlllistItems;
-            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
-        }
-
         private void listBox1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            // Si on a une sélection
             if (listBox1.SelectedIndex != -1)
             {
-                string Url = parser.listItemsAffichee.ElementAt(listBox1.SelectedIndex).url;
-                Process.Start(Url);
+                // On ouvre la page du deal
+                OuvrirURL();
             }
         }
 
         private void btnOuvrirUrl_Click(object sender, RoutedEventArgs e)
         {
+            // Si on a une sélection
             if (listBox1.SelectedIndex != -1)
             {
-                string Url = parser.listItemsAffichee.ElementAt(listBox1.SelectedIndex).url;
-                Process.Start(Url);
+                // On ouvre la page du deal
+                OuvrirURL();
             }
+        }
+
+        private void OuvrirURL()
+        {
+            string Url = parser.listItemsAffichee.ElementAt(listBox1.SelectedIndex).url;
+            Process.Start(Url);
         }
 
         private void ShowNotif()
@@ -146,6 +160,22 @@ namespace DealAlert
             notif.ShowDialog();
             Thread.Sleep(10000);
             notif.Close();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void tbxFiltre_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string ContentFiltre = tbxFiltre.Text;
+            // On filtre directement sur le contenu de la liste
+            parser.filtrerItems(ContentFiltre);
+            // Et on l'affiche
+            this.listBox1.SelectedIndex = -1;
+            this.listBox1.ItemsSource = parser.listItemsFiltres;
+            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
         }
     }
 }

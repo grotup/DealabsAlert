@@ -16,36 +16,69 @@ namespace DealabsAlert
     {
         private string url;
         private int nbMinutes;
-        public ObservableCollection<DealabsItem> AlllistItems;
-        public ObservableCollection<DealabsItem> listItemsFiltres;
-        public ObservableCollection<DealabsItem> listItemsAffichee;
+        public List<DealabsItem> AlllistItems = new List<DealabsItem>();
+        public List<DealabsItem> listItemsFiltres;
+        public List<DealabsItem> listItemsAffichee;
         public DateTime DateDernierItem;
-        private bool premierUpdate = true;
 
+        /// <summary>
+        /// Constructeur de la classe
+        /// </summary>
+        /// <param name="url">URL de Dealabs</param>
+        /// <param name="nbMinutes"></param>
         public DealabsParser(string url, int nbMinutes)
         {
             this.url = url;
             this.nbMinutes = nbMinutes;
         }
 
-        public ObservableCollection<DealabsItem> filtrerItems(string filtre)
+        public List<DealabsItem> filtrerItems(string filtre)
         {
             // Si on demande de filtrer alors qu'on n'a pas de liste, on la crée
             if (AlllistItems == null)
             {
                 updateItems(false);
             }
-            ObservableCollection<DealabsItem> retList = new ObservableCollection<DealabsItem>();
+            List<DealabsItem> retList = new List<DealabsItem>();
+            // Pour chaque item ...
             foreach (DealabsItem item in AlllistItems)
             {
+                // Si le titre contient ce qu'on cherche
                 if (item.titre.ToUpper().Contains(filtre.ToUpper()))
                 {
                      retList.Add(item);
                 }
             }
             this.listItemsFiltres = retList;
-            listItemsAffichee = listItemsFiltres;
             return retList;
+        }
+
+        internal void updateItems(bool notifier)
+        {
+            List<DealabsItem> retList = new List<DealabsItem>();
+            // On ouvre un stream
+            Stream stream = getStreamRSS();
+
+            // On charge le stream en Xml
+            XmlDocument doc = new XmlDocument();
+            doc.Load(stream);
+            XmlNodeList listItems = doc.GetElementsByTagName("item");
+
+            // Pour chaque item
+            foreach (XmlNode item in listItems)
+            {
+                // On crée un objet qu'on ajoute dans la liste
+                string date = item.SelectSingleNode("pubDate").InnerText;
+                DateTime DateFormatted = Convert.ToDateTime(date);
+                if ((DateFormatted < (DateTime.Now.AddMinutes(-nbMinutes))) == false)
+                {
+                    retList.Add(new DealabsItem(item.SelectSingleNode("link").InnerText, item.SelectSingleNode("title").InnerText, DateFormatted));
+                }
+            }
+            // On définit le dernier item daté
+            this.AlllistItems = retList;
+            this.listItemsAffichee = retList;
+            this.DateDernierItem = AlllistItems.ElementAt(0).date;
         }
 
         private Stream getStreamRSS()
@@ -54,49 +87,32 @@ namespace DealabsAlert
             return wb.OpenRead(this.url);
         }
 
-        private void saveItems()
+        public List<DealabsItem> getNouveauxDeals(DateTime DateFrom)
         {
-            StreamWriter streamItems = new StreamWriter("liste");
-            foreach( DealabsItem item in AlllistItems )
+            List<DealabsItem> ret = new List<DealabsItem>();
+            int idxDeals = 0;
+            bool sortir = false;
+            // Tant qu'on n'a pas trouvé de nouveaux deals
+            while (!sortir)
             {
-                streamItems.Write(item.date.ToString() + "///" + item.titre + "///" + item.url + "\n");
-            }
-        }
-
-        internal void updateItems(bool notifier)
-        {
-            ObservableCollection<DealabsItem> retList = new ObservableCollection<DealabsItem>();
-            Stream stream = getStreamRSS();
-
-            // On charge le stream en Xml
-            XmlDocument doc = new XmlDocument();
-            doc.Load(stream);
-            XmlNodeList listItems = doc.GetElementsByTagName("item");
-
-            // On renvoie que les items qu'on veut dans le app.config
-            foreach (XmlNode item in listItems)
-            {
-                string date = item.SelectSingleNode("pubDate").InnerText;
-                DateTime DateFormatted = Convert.ToDateTime(date);
-                if ((DateFormatted < (DateTime.Now.AddMinutes(-nbMinutes))) == false)
+                // Si la date est anterieure à celle passée en paramètre, on ajoute le deal au retour
+                if (AlllistItems.ElementAt(idxDeals).date.CompareTo(DateFrom) > 0)
                 {
-                    retList.Add(new DealabsItem(item.SelectSingleNode("link").InnerText, item.SelectSingleNode("title").InnerText, DateFormatted));
+                    ret.Add(AlllistItems.ElementAt(idxDeals));
+                }else
+                {
+                    // Dès qu'on a une date équivalente ou inferieure, c'est qu'on n'a plus de nouveaux items
+                    sortir = true;
                 }
+                idxDeals++;
             }
-            AlllistItems = retList;
-            listItemsAffichee = AlllistItems;
-//            if ((DateDernierItem != AlllistItems.ElementAt(0).date) && (!premierUpdate) && (notifier))
-            if (premierUpdate) premierUpdate = false;
-            this.DateDernierItem = AlllistItems.ElementAt(0).date;
-        }
-
-        internal int getNbItems()
-        {
-            return (AlllistItems == null) ? 0 : AlllistItems.Count;
+            // Et on renvoie la liste des deals
+            return ret;
         }
 
         internal void resetFiltre()
         {
+            // On définit comme étant affiché tous les deals
             this.listItemsAffichee = AlllistItems;
         }
     }
