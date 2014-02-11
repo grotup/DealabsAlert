@@ -6,6 +6,9 @@ using System.IO;
 using System.Net;
 using System.Xml;
 using System.Configuration;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using DealAlert;
 
 namespace DealabsAlert
 {
@@ -13,10 +16,11 @@ namespace DealabsAlert
     {
         private string url;
         private int nbMinutes;
-        public List<DealabsItem> AlllistItems;
-        public List<DealabsItem> listItemsFiltres;
-        public List<DealabsItem> listItemsAffichee;
+        public ObservableCollection<DealabsItem> AlllistItems;
+        public ObservableCollection<DealabsItem> listItemsFiltres;
+        public ObservableCollection<DealabsItem> listItemsAffichee;
         public DateTime DateDernierItem;
+        private bool premierUpdate = true;
 
         public DealabsParser(string url, int nbMinutes)
         {
@@ -24,14 +28,14 @@ namespace DealabsAlert
             this.nbMinutes = nbMinutes;
         }
 
-        public List<DealabsItem> filtrerItems(string filtre)
+        public ObservableCollection<DealabsItem> filtrerItems(string filtre)
         {
             // Si on demande de filtrer alors qu'on n'a pas de liste, on la crée
             if (AlllistItems == null)
             {
-                updateItems();
+                updateItems(false);
             }
-            List<DealabsItem> retList = new List<DealabsItem>();
+            ObservableCollection<DealabsItem> retList = new ObservableCollection<DealabsItem>();
             foreach (DealabsItem item in AlllistItems)
             {
                 if (item.titre.ToUpper().Contains(filtre.ToUpper()))
@@ -59,9 +63,9 @@ namespace DealabsAlert
             }
         }
 
-        internal void updateItems()
+        internal void updateItems(bool notifier)
         {
-            List<DealabsItem> retList = new List<DealabsItem>();
+            ObservableCollection<DealabsItem> retList = new ObservableCollection<DealabsItem>();
             Stream stream = getStreamRSS();
 
             // On charge le stream en Xml
@@ -81,6 +85,11 @@ namespace DealabsAlert
             }
             AlllistItems = retList;
             listItemsAffichee = AlllistItems;
+            if ((DateDernierItem != AlllistItems.ElementAt(0).date) && (!premierUpdate) && (notifier))
+            {
+                listChanged();
+            }
+            if (premierUpdate) premierUpdate = false;
             this.DateDernierItem = AlllistItems.ElementAt(0).date;
         }
 
@@ -92,6 +101,19 @@ namespace DealabsAlert
         internal void resetFiltre()
         {
             this.listItemsAffichee = AlllistItems;
+        }
+
+        public void listChanged()
+        {
+            // Pour chaque item, on regarde la date
+            DateTime DateItem = AlllistItems.ElementAt(0).date;
+            int NbNouveauxItems = 0;
+            while (DateItem != this.DateDernierItem)
+            {
+                DateItem = AlllistItems.ElementAt(NbNouveauxItems).date;
+                NbNouveauxItems++;
+            }
+            NotificationWindow window = new NotificationWindow("Dealabs : " + NbNouveauxItems + " nouveaux deals !");
         }
     }
 }

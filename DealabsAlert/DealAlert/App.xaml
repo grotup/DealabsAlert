@@ -5,4 +5,9 @@
     <Application.Resources>
          
     </Application.Resources>
+    <JumpList.JumpList>
+        <JumpList>
+            
+        </JumpList>
+    </JumpList.JumpList>
 </Application>

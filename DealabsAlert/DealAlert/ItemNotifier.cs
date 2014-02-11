@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using DealabsAlert;
 using System.Windows.Forms;
+using System.Collections.ObjectModel;
 
 namespace DealAlert
 {
@@ -12,21 +13,14 @@ namespace DealAlert
     {
         private List<DealabsItem> listeItems;
         public static DealabsParser LeParser;
+        public Thread CallerThread;
 
         public static void ThreadLoop()
         {
             while (Thread.CurrentThread.IsAlive)
             {
-                List<DealabsItem> ListeActuelle = LeParser.AlllistItems;
-                LeParser.updateItems();
-
-                if (LeParser.DateDernierItem > ListeActuelle.ElementAt(0).date)
-                {
-                    NotifyIcon notify = new NotifyIcon();
-                    notify.BalloonTipText = "Coucou !";
-                    
-                    notify.ShowBalloonTip(10000);
-                }
+                ObservableCollection<DealabsItem> ListeActuelle = LeParser.AlllistItems;
+                LeParser.updateItems(true);
                 Thread.Sleep(30000);
             }
         }

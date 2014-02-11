@@ -17,6 +17,7 @@ using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Windows.Shell;
 
 namespace DealAlert
 {
@@ -30,15 +31,28 @@ namespace DealAlert
         public DealabsAlert()
         {
             InitializeComponent();
-
             parser = new DealabsParser(ConfigurationSettings.AppSettings["url"], Convert.ToInt16(ConfigurationSettings.AppSettings["refreshMinutes"]));
-            parser.updateItems();
+            parser.updateItems(false);
             this.listBox1.ItemsSource = parser.AlllistItems;
-            this.lnNbItems.SetBinding(System.Windows.Controls.Label.ContentProperty, parser.getNbItems().ToString());
+            
             ItemNotifier.LeParser = parser;
             Thread newThread = new Thread(ItemNotifier.ThreadLoop);
+            newThread.SetApartmentState(ApartmentState.STA);
             newThread.Start();
+            newThread.IsBackground = true;
+
+            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
             btnOuvrirUrl.IsEnabled = false;
+
+            
+            JumpTask test = new JumpTask();
+            test.Title = "Test ?";
+            test.Description = "Jump de test";
+            test.ApplicationPath = "www.google.fr";
+            JumpList list = new JumpList();
+            list.JumpItems.Add(test);
+            JumpList.SetJumpList(System.Windows.Application.Current, list);
+            list.Apply();
         }
 
         private void listBox1_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -54,17 +68,17 @@ namespace DealAlert
                 btnOuvrirUrl.IsEnabled = false;
                 lbTitre.Content = string.Empty;
                 lbDate.Content = string.Empty;
-                   
             }
         }
 
         private void btnActualiser_Click(object sender, RoutedEventArgs e)
         {
             this.Cursor = System.Windows.Input.Cursors.Wait;
-            parser.updateItems();
+            parser.updateItems(false);
             this.listBox1.SelectedIndex = -1;
             listBox1.ItemsSource = parser.AlllistItems;
             this.Cursor = null;
+            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
         }
 
         private void btnFiltre_Click(object sender, RoutedEventArgs e)
@@ -75,6 +89,7 @@ namespace DealAlert
             }
             this.listBox1.SelectedIndex = -1;
             this.listBox1.ItemsSource = parser.listItemsFiltres;
+            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
             tbxFiltre.Text = string.Empty;
         }
 
@@ -83,6 +98,7 @@ namespace DealAlert
             parser.resetFiltre();
             this.listBox1.SelectedIndex = -1;
             listBox1.ItemsSource = parser.AlllistItems;
+            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
         }
 
         private void listBox1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -101,6 +117,14 @@ namespace DealAlert
                 string Url = parser.listItemsAffichee.ElementAt(listBox1.SelectedIndex).url;
                 Process.Start(Url);
             }
+        }
+
+        private void ShowNotif()
+        {
+            NotificationWindow notif = new NotificationWindow("Nouveaux élements");
+            notif.ShowDialog();
+            Thread.Sleep(10000);
+            notif.Close();
         }
     }
 }
