@@ -85,10 +85,7 @@ namespace DealabsAlert
             }
             AlllistItems = retList;
             listItemsAffichee = AlllistItems;
-            if ((DateDernierItem != AlllistItems.ElementAt(0).date) && (!premierUpdate) && (notifier))
-            {
-                listChanged();
-            }
+//            if ((DateDernierItem != AlllistItems.ElementAt(0).date) && (!premierUpdate) && (notifier))
             if (premierUpdate) premierUpdate = false;
             this.DateDernierItem = AlllistItems.ElementAt(0).date;
         }
@@ -101,19 +98,6 @@ namespace DealabsAlert
         internal void resetFiltre()
         {
             this.listItemsAffichee = AlllistItems;
-        }
-
-        public void listChanged()
-        {
-            // Pour chaque item, on regarde la date
-            DateTime DateItem = AlllistItems.ElementAt(0).date;
-            int NbNouveauxItems = 0;
-            while (DateItem != this.DateDernierItem)
-            {
-                DateItem = AlllistItems.ElementAt(NbNouveauxItems).date;
-                NbNouveauxItems++;
-            }
-            NotificationWindow window = new NotificationWindow("Dealabs : " + NbNouveauxItems + " nouveaux deals !");
         }
     }
 }

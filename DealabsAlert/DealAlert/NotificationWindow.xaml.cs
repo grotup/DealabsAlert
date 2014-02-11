@@ -41,7 +41,6 @@ namespace DealAlert
         private void DoubleAnimationUsingKeyFrames_Completed(object sender, EventArgs e)
         {
             this.Close();
-
         }
     }
 }

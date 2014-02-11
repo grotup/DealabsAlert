@@ -15,9 +15,10 @@ using DealabsAlert;
 using System.Configuration;
 using System.IO;
 using System.Threading;
-using System.Windows.Forms;
 using System.Diagnostics;
 using System.Windows.Shell;
+using System.Windows.Threading;
+using System.ComponentModel;
 
 namespace DealAlert
 {
@@ -26,8 +27,9 @@ namespace DealAlert
     /// </summary>
     public partial class DealabsAlert : Window
     {
-
         DealabsParser parser;
+        DateTime DateDernierItem;
+
         public DealabsAlert()
         {
             InitializeComponent();
@@ -35,24 +37,43 @@ namespace DealAlert
             parser.updateItems(false);
             this.listBox1.ItemsSource = parser.AlllistItems;
             
-            ItemNotifier.LeParser = parser;
-            Thread newThread = new Thread(ItemNotifier.ThreadLoop);
-            newThread.SetApartmentState(ApartmentState.STA);
-            newThread.Start();
-            newThread.IsBackground = true;
-
             lnNbItems.Content = listBox1.Items.Count + " élement(s).";
             btnOuvrirUrl.IsEnabled = false;
 
-            
-            JumpTask test = new JumpTask();
-            test.Title = "Test ?";
-            test.Description = "Jump de test";
-            test.ApplicationPath = "www.google.fr";
-            JumpList list = new JumpList();
-            list.JumpItems.Add(test);
-            JumpList.SetJumpList(System.Windows.Application.Current, list);
-            list.Apply();
+            DispatcherTimer dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 10);
+            dispatcherTimer.Start();
+        }
+
+        private void dispatcherTimer_Tick(Object sender, EventArgs e)
+        {
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += worker_DoWork;
+            worker.RunWorkerCompleted += worker_UpdateUI;
+            worker.RunWorkerAsync();
+        }
+
+        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            DateDernierItem = parser.AlllistItems.ElementAt(0).date;
+            parser.updateItems(true);
+        }
+
+        private void worker_UpdateUI(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if ((parser.DateDernierItem != DateDernierItem))
+            {
+                NotificationWindow window = new NotificationWindow("Nouveaux deals !");
+                window.Show();
+            }
+            int Selected = listBox1.SelectedIndex;
+            listBox1.ItemsSource = parser.AlllistItems;
+
+            if(Selected != -1)
+                listBox1.SelectedItem = listBox1.Items.GetItemAt(Selected);
+
+            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
         }
 
         private void listBox1_SelectionChanged(object sender, SelectionChangedEventArgs e)
