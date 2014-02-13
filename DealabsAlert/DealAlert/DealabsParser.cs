@@ -16,9 +16,7 @@ namespace DealabsAlert
     {
         private string url;
         private int nbMinutes;
-        public List<DealabsItem> AlllistItems = new List<DealabsItem>();
-        public List<DealabsItem> listItemsFiltres;
-        public List<DealabsItem> listItemsAffichee;
+        private List<DealabsItem> AlllistItems = new List<DealabsItem>();
         public DateTime DateDernierItem;
 
         /// <summary>
@@ -32,28 +30,10 @@ namespace DealabsAlert
             this.nbMinutes = nbMinutes;
         }
 
-        public List<DealabsItem> filtrerItems(string filtre)
-        {
-            // Si on demande de filtrer alors qu'on n'a pas de liste, on la crée
-            if (AlllistItems == null)
-            {
-                updateItems(false);
-            }
-            List<DealabsItem> retList = new List<DealabsItem>();
-            // Pour chaque item ...
-            foreach (DealabsItem item in AlllistItems)
-            {
-                // Si le titre contient ce qu'on cherche
-                if (item.titre.ToUpper().Contains(filtre.ToUpper()))
-                {
-                     retList.Add(item);
-                }
-            }
-            this.listItemsFiltres = retList;
-            return retList;
-        }
-
-        internal void updateItems(bool notifier)
+        /// <summary>
+        /// Fonction qui rafraichit la liste principale des deals
+        /// </summary>
+        internal void updateItems()
         {
             List<DealabsItem> retList = new List<DealabsItem>();
             // On ouvre un stream
@@ -64,29 +44,33 @@ namespace DealabsAlert
             doc.Load(stream);
             XmlNodeList listItems = doc.GetElementsByTagName("item");
 
+            // On se limite à 100 deals
+            int nbItemsMax = 100;
             // Pour chaque item
             foreach (XmlNode item in listItems)
             {
                 // On crée un objet qu'on ajoute dans la liste
                 string date = item.SelectSingleNode("pubDate").InnerText;
                 DateTime DateFormatted = Convert.ToDateTime(date);
-                if ((DateFormatted < (DateTime.Now.AddMinutes(-nbMinutes))) == false)
+                retList.Add(new DealabsItem(item.SelectSingleNode("link").InnerText, item.SelectSingleNode("title").InnerText, DateFormatted));
+                // On décrémente, et si on est à 0 on break;
+                nbItemsMax--;
+                // Si on a parsé 100 items, on arrête.
+                if (nbItemsMax == 0)
                 {
-                    retList.Add(new DealabsItem(item.SelectSingleNode("link").InnerText, item.SelectSingleNode("title").InnerText, DateFormatted));
+                    break;
                 }
             }
             // On définit le dernier item daté
             this.AlllistItems = retList;
-            this.listItemsAffichee = retList;
             this.DateDernierItem = AlllistItems.ElementAt(0).date;
         }
 
-        private Stream getStreamRSS()
-        {
-            WebClient wb = new WebClient();
-            return wb.OpenRead(this.url);
-        }
-
+        /// <summary>
+        /// Fonction qui renvoie les nouveaux deals par rapport à une date passée en paramètre
+        /// </summary>
+        /// <param name="DateFrom">La date depuis laquelle on veut les nouveaux items</param>
+        /// <returns>La liste des nouveaux items depuis la date DateFrom</returns>
         public List<DealabsItem> getNouveauxDeals(DateTime DateFrom)
         {
             List<DealabsItem> ret = new List<DealabsItem>();
@@ -96,7 +80,7 @@ namespace DealabsAlert
             while (!sortir)
             {
                 // Si la date est anterieure à celle passée en paramètre, on ajoute le deal au retour
-                if (AlllistItems.ElementAt(idxDeals).date.CompareTo(DateFrom) > 0)
+                if (idxDeals < AlllistItems.Count && AlllistItems.ElementAt(idxDeals).date.CompareTo(DateFrom) > 0)
                 {
                     ret.Add(AlllistItems.ElementAt(idxDeals));
                 }else
@@ -110,10 +94,56 @@ namespace DealabsAlert
             return ret;
         }
 
-        internal void resetFiltre()
+        /// <summary>
+        /// Fonction qui renvoie la liste des items, selon un filtre. Si le filtre est string.empty, on renvoie la liste de tous les deals,
+        /// sinon, on renvoie la liste des items filtrés
+        /// </summary>
+        /// <param name="p">Filtre pour la liste, "" pour avoir toute la liste</param>
+        /// <returns>La liste des items</returns>
+        public List<DealabsItem> GetList(string p)
         {
-            // On définit comme étant affiché tous les deals
-            this.listItemsAffichee = AlllistItems;
+            // Si on n'a pas de filtre, on renvoie directement la liste
+            if (string.IsNullOrEmpty(p))
+            {
+                return AlllistItems;
+            }
+            // Si on en a un, on renvoie une liste filtrée
+            return this.filtrerItems(p);
+        }
+
+        /// <summary>
+        /// Fonction qui filtre les items de la liste principale, et qui renvoie une liste de ces items
+        /// </summary>
+        /// <param name="filtre">Le filtre correspondant</param>
+        /// <returns>Liste des items filtrés</returns>
+        private List<DealabsItem> filtrerItems(string filtre)
+        {
+            // Si on demande de filtrer alors qu'on n'a pas de liste, on la crée
+            if (AlllistItems == null)
+            {
+                updateItems();
+            }
+            List<DealabsItem> retList = new List<DealabsItem>();
+            // Pour chaque item ...
+            foreach (DealabsItem item in AlllistItems)
+            {
+                // Si le titre contient ce qu'on cherche
+                if (item.titre.ToUpper().Contains(filtre.ToUpper()))
+                {
+                    retList.Add(item);
+                }
+            }
+            return retList;
+        }
+
+        /// <summary>
+        /// Fonction qu irenvoie le stream correspondant à l'URL
+        /// </summary>
+        /// <returns>Stream créé</returns>
+        private Stream getStreamRSS()
+        {
+            WebClient wb = new WebClient();
+            return wb.OpenRead(this.url);
         }
     }
 }

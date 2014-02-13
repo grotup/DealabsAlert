@@ -29,13 +29,16 @@ namespace DealAlert
     {
         DealabsParser parser;
         DateTime DateDernierItem;
+        List<DealabsItem> ListeAffichee;
 
         public DealabsAlert()
         {
             InitializeComponent();
             parser = new DealabsParser(ConfigurationSettings.AppSettings["url"], Convert.ToInt16(ConfigurationSettings.AppSettings["refreshMinutes"]));
-            parser.updateItems(false);
-            this.listBox1.ItemsSource = parser.AlllistItems;
+            parser.updateItems();
+
+            this.ListeAffichee = parser.GetList(string.Empty);
+            this.listBox1.ItemsSource = this.ListeAffichee;
             
             lnNbItems.Content = listBox1.Items.Count + " élement(s).";
             btnOuvrirUrl.IsEnabled = false;
@@ -56,8 +59,8 @@ namespace DealAlert
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            DateDernierItem = parser.AlllistItems.ElementAt(0).date;
-            parser.updateItems(true);
+            DateDernierItem = this.ListeAffichee.ElementAt(0).date;
+            parser.updateItems();
         }
 
         private void worker_UpdateUI(object sender, RunWorkerCompletedEventArgs e)
@@ -90,7 +93,8 @@ namespace DealAlert
             {
                 // On garde la sélection dans la liste
                 int Selected = listBox1.SelectedIndex;
-                listBox1.ItemsSource = parser.AlllistItems;
+                this.ListeAffichee = parser.GetList(string.Empty);
+                listBox1.ItemsSource = this.ListeAffichee;
 
                 if(Selected != -1)
                     listBox1.SelectedItem = listBox1.Items.GetItemAt(Selected);
@@ -105,8 +109,8 @@ namespace DealAlert
             // Si une ligne est sélectionnée dans la liste, on initialise les champs avec la valeur du deal
             if (listBox1.SelectedIndex != -1)
             {
-                lbTitre.Content = parser.listItemsAffichee.ElementAt(listBox1.SelectedIndex).titre;
-                lbDate.Content = parser.listItemsAffichee.ElementAt(listBox1.SelectedIndex).date.ToString();
+                lbTitre.Content = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).titre;
+                lbDate.Content = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).date.ToString();
                 // On empêche aussi le clic sur le bouton "Ouvrir"
                 btnOuvrirUrl.IsEnabled = true;
             }
@@ -124,10 +128,11 @@ namespace DealAlert
             // On change le curseur
             this.Cursor = System.Windows.Input.Cursors.Wait;
             // On lance l'update
-            parser.updateItems(false);
+            parser.updateItems();
             // Et on met à jour la vue
             this.listBox1.SelectedIndex = -1;
-            listBox1.ItemsSource = parser.AlllistItems;
+            this.ListeAffichee = parser.GetList(string.Empty);
+            listBox1.ItemsSource = this.ListeAffichee;
             this.Cursor = null;
             lnNbItems.Content = listBox1.Items.Count + " élement(s).";
         }
@@ -158,11 +163,11 @@ namespace DealAlert
             string Url;
             if (!string.IsNullOrEmpty(tbxFiltre.Text))
             {
-                Url = parser.listItemsFiltres.ElementAt(listBox1.SelectedIndex).url;
+                Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).url;
             }
             else
             {
-                Url = parser.AlllistItems.ElementAt(listBox1.SelectedIndex).url;
+                Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).url;
             }
             Process.Start(Url);
         }
@@ -184,10 +189,10 @@ namespace DealAlert
         {
             string ContentFiltre = tbxFiltre.Text;
             // On filtre directement sur le contenu de la liste
-            parser.filtrerItems(ContentFiltre);
+            this.ListeAffichee = parser.GetList(ContentFiltre);
             // Et on l'affiche
             this.listBox1.SelectedIndex = -1;
-            this.listBox1.ItemsSource = parser.listItemsFiltres;
+            this.listBox1.ItemsSource = this.ListeAffichee;
             lnNbItems.Content = listBox1.Items.Count + " élement(s).";
         }
     }
