@@ -42,7 +42,7 @@ namespace DealAlert
 
             DispatcherTimer dispatcherTimer = new DispatcherTimer();
             dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 10);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 60);
             dispatcherTimer.Start();
         }
 
@@ -85,15 +85,19 @@ namespace DealAlert
                 NotificationWindow window = new NotificationWindow(message);
                 window.Show();
             }
-            // On garde la sélection dans la liste
-            int Selected = listBox1.SelectedIndex;
-            listBox1.ItemsSource = parser.AlllistItems;
+            // Si on a un filtre actif, on refresh pas la vue
+            if(string.IsNullOrEmpty(tbxFiltre.Text))
+            {
+                // On garde la sélection dans la liste
+                int Selected = listBox1.SelectedIndex;
+                listBox1.ItemsSource = parser.AlllistItems;
 
-            if(Selected != -1)
-                listBox1.SelectedItem = listBox1.Items.GetItemAt(Selected);
+                if(Selected != -1)
+                    listBox1.SelectedItem = listBox1.Items.GetItemAt(Selected);
 
-            // Et on met à jour le nombre d'items affichés
-            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
+                // Et on met à jour le nombre d'items affichés
+                lnNbItems.Content = listBox1.Items.Count + " élement(s).";
+            }
         }
 
         private void listBox1_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -150,7 +154,16 @@ namespace DealAlert
 
         private void OuvrirURL()
         {
-            string Url = parser.listItemsAffichee.ElementAt(listBox1.SelectedIndex).url;
+            // Si on a un filtre actif, charge l'item dans la liste des items filtrés
+            string Url;
+            if (!string.IsNullOrEmpty(tbxFiltre.Text))
+            {
+                Url = parser.listItemsFiltres.ElementAt(listBox1.SelectedIndex).url;
+            }
+            else
+            {
+                Url = parser.AlllistItems.ElementAt(listBox1.SelectedIndex).url;
+            }
             Process.Start(Url);
         }
 
