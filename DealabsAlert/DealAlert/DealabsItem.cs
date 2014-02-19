@@ -8,7 +8,9 @@ namespace DealabsAlert
 {
     class DealabsItem
     {
-        public string url;
+        public string UrlDealabs;
+        public string UrlDeal = string.Empty;
+        public string Code = string.Empty;
         public string titre;
         public DateTime date;
         public string description;
@@ -16,7 +18,7 @@ namespace DealabsAlert
 
         public DealabsItem(string url, string titre, DateTime date, string Description)
         {
-            this.url = url;
+            this.UrlDealabs = url;
             this.titre = titre;
             this.date = date;
             this.description = Description;
@@ -31,15 +33,42 @@ namespace DealabsAlert
         {
             HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
             HtmlWeb html = new HtmlWeb();
-            document = html.Load(url);
+            document = html.Load(UrlDealabs);
 
-            document.DocumentNode.SelectSingleNode("//a[@class=voirledeal]");
             HtmlNode NoeudLien = document.DocumentNode.SelectSingleNode("//meta[@property='og:image']");
             if (NoeudLien != null)
             {
                 LinkImage = NoeudLien.GetAttributeValue("content", string.Empty);
             }
             return !string.IsNullOrEmpty(LinkImage);
+        }
+
+        public bool ParserUrlDeal()
+        {
+            HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
+            HtmlWeb html = new HtmlWeb();
+            document = html.Load(UrlDealabs);
+
+            HtmlNode NoeudLien = document.DocumentNode.SelectSingleNode("//a[@class='voirledeal']")
+            if (NoeudLien != null)
+            {
+                UrlDeal = NoeudLien.GetAttributeValue("href", string.Empty);
+            }
+            return !string.IsNullOrEmpty(UrlDeal);
+        }
+
+        public bool ParserCode()
+        {
+            HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
+            HtmlWeb html = new HtmlWeb();
+            document = html.Load(UrlDealabs);
+
+            HtmlNode NoeudLien = document.DocumentNode.SelectSingleNode("//input[starts-with(@id,'voucher_code')]");
+            if (NoeudLien != null)
+            {
+                Code = NoeudLien.GetAttributeValue("value", string.Empty);
+            }
+            return !string.IsNullOrEmpty(Code);
         }
     }
 }

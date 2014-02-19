@@ -75,6 +75,8 @@ namespace DealabsAlert
         {
             foreach (DealabsItem item in AlllistItems){
                 item.ParserImage();
+                item.ParserCode();
+                item.ParserUrlDeal();
             }
 
             return AlllistItems;

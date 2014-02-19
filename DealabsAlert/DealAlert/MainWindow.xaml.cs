@@ -201,11 +201,11 @@ namespace DealAlert
             string Url;
             if (!string.IsNullOrEmpty(tbxFiltre.Text))
             {
-                Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).url;
+                Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).UrlDealabs;
             }
             else
             {
-                Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).url;
+                Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).UrlDealabs;
             }
             Process.Start(Url);
         }
