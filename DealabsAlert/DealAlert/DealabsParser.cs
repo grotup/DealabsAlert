@@ -52,7 +52,8 @@ namespace DealabsAlert
                 // On crée un objet qu'on ajoute dans la liste
                 string date = item.SelectSingleNode("pubDate").InnerText;
                 DateTime DateFormatted = Convert.ToDateTime(date);
-                retList.Add(new DealabsItem(item.SelectSingleNode("link").InnerText, item.SelectSingleNode("title").InnerText, DateFormatted));
+                DealabsItem ItemToAdd = new DealabsItem(item.SelectSingleNode("link").InnerText, item.SelectSingleNode("title").InnerText, DateFormatted, item.SelectSingleNode("description").InnerText);
+                retList.Add(ItemToAdd);
                 // On décrémente, et si on est à 0 on break;
                 nbItemsMax--;
                 // Si on a parsé 100 items, on arrête.
@@ -64,6 +65,19 @@ namespace DealabsAlert
             // On définit le dernier item daté
             this.AlllistItems = retList;
             this.DateDernierItem = AlllistItems.ElementAt(0).date;
+        }
+
+        /// <summary>
+        /// Fonction qui lance le parsing des items contenus dans la liste
+        /// </summary>
+        /// <returns>La liste des items</returns>
+        public List<DealabsItem> ParserDealItems()
+        {
+            foreach (DealabsItem item in AlllistItems){
+                item.ParserImage();
+            }
+
+            return AlllistItems;
         }
 
         /// <summary>

@@ -35,6 +35,8 @@ namespace DealAlert
         {
             InitializeComponent();
             parser = new DealabsParser(ConfigurationSettings.AppSettings["url"], Convert.ToInt16(ConfigurationSettings.AppSettings["refreshMinutes"]));
+            
+            // On fait un premier update
             parser.updateItems();
 
             this.ListeAffichee = parser.GetList(string.Empty);
@@ -43,6 +45,34 @@ namespace DealAlert
             lnNbItems.Content = listBox1.Items.Count + " élement(s).";
             btnOuvrirUrl.IsEnabled = false;
 
+            LancerWorkerParsing();
+        }
+
+        private void LancerWorkerParsing()
+        {
+            BackgroundWorker WorkerParsing = new BackgroundWorker();
+            WorkerParsing.DoWork += WorkerParsing_DoWork;
+            WorkerParsing.RunWorkerCompleted += WorkerParsing_End;
+            WorkerParsing.RunWorkerAsync();
+        }
+
+        private void WorkerParsing_End(object sender, RunWorkerCompletedEventArgs e)
+        {
+            this.ListeAffichee = parser.GetList(string.Empty);
+            this.listBox1.ItemsSource = this.ListeAffichee;
+
+            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
+        }
+
+        private void WorkerParsing_DoWork(object sender, DoWorkEventArgs e)
+        {
+            parser.ParserDealItems();
+            // Après tout ça, on lance le worker pour la MAJ des items
+            LancerWorkerMAJ();
+        }
+
+        private void LancerWorkerMAJ()
+        {
             DispatcherTimer dispatcherTimer = new DispatcherTimer();
             dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
             dispatcherTimer.Interval = new TimeSpan(0, 0, 60);
@@ -102,6 +132,7 @@ namespace DealAlert
                 // Et on met à jour le nombre d'items affichés
                 lnNbItems.Content = listBox1.Items.Count + " élement(s).";
             }
+            UpdateText.Visibility = Visibility.Hidden;
         }
 
         private void listBox1_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -109,8 +140,19 @@ namespace DealAlert
             // Si une ligne est sélectionnée dans la liste, on initialise les champs avec la valeur du deal
             if (listBox1.SelectedIndex != -1)
             {
-                lbTitre.Content = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).titre;
-                lbDate.Content = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).date.ToString();
+                DealabsItem item = this.ListeAffichee.ElementAt(listBox1.SelectedIndex);
+                lbTitre.Content = item.titre;
+                lbDate.Content = item.date.ToString();
+                // On cherche à parser l'image seulement si il en a une
+                if (!string.IsNullOrEmpty(item.LinkImage))
+                {
+                    BitmapImage BImageDeal = new BitmapImage();
+                    BImageDeal.BeginInit();
+                    BImageDeal.UriSource = new Uri(item.LinkImage, UriKind.Absolute);
+                    BImageDeal.EndInit();
+                    ImageDeal.Stretch = Stretch.Fill;
+                    ImageDeal.Source = BImageDeal;
+                }
                 // On empêche aussi le clic sur le bouton "Ouvrir"
                 btnOuvrirUrl.IsEnabled = true;
             }
@@ -125,16 +167,12 @@ namespace DealAlert
 
         private void btnActualiser_Click(object sender, RoutedEventArgs e)
         {
-            // On change le curseur
-            this.Cursor = System.Windows.Input.Cursors.Wait;
-            // On lance l'update
-            parser.updateItems();
-            // Et on met à jour la vue
-            this.listBox1.SelectedIndex = -1;
-            this.ListeAffichee = parser.GetList(string.Empty);
-            listBox1.ItemsSource = this.ListeAffichee;
-            this.Cursor = null;
-            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
+            UpdateText.Visibility = Visibility.Visible;
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += worker_DoWork;
+            worker.WorkerReportsProgress = true;
+            worker.RunWorkerCompleted += worker_UpdateUI;
+            worker.RunWorkerAsync();
         }
 
         private void listBox1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
