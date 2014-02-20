@@ -45,10 +45,11 @@ namespace DealabsAlert
             XmlNodeList listItems = doc.GetElementsByTagName("item");
 
             // On se limite à 100 deals
-            int nbItemsMax = 100;
+            Int16 nbItemsMax = Convert.ToInt16(ConfigurationSettings.AppSettings["nombre_items_parsing"]);
             // Pour chaque item
             foreach (XmlNode item in listItems)
             {
+                
                 // On crée un objet qu'on ajoute dans la liste
                 string date = item.SelectSingleNode("pubDate").InnerText;
                 DateTime DateFormatted = Convert.ToDateTime(date);

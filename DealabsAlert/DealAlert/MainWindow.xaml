@@ -11,11 +11,14 @@
         <Label Height="28" Margin="12,386,181,0" Name="lbTitre" VerticalAlignment="Top" Grid.ColumnSpan="2" />
         <Label Height="28" Margin="12,420,181,0" Name="lbDate" VerticalAlignment="Top" Grid.ColumnSpan="2" />
         <Button Content="Actualiser" Height="23" HorizontalAlignment="Left" Margin="12,12,0,0" Name="btnActualiser" VerticalAlignment="Top" Width="75" Click="btnActualiser_Click" />
-        <TextBox Height="23" HorizontalAlignment="Right" Margin="0,12,198,0" Name="tbxFiltre" VerticalAlignment="Top" Width="120" Grid.Column="1" TextChanged="tbxFiltre_TextChanged" />
-        <Label Content="Filtre :" Height="23" HorizontalAlignment="Right" Margin="0,12,324,0" Name="lbFiltre" VerticalAlignment="Top" Width="44" VerticalContentAlignment="Top" Grid.Column="1" />
+        <TextBox Height="23" HorizontalAlignment="Right" Margin="0,11,13,0" Name="tbxFiltre" VerticalAlignment="Top" Width="120" Grid.Column="1" TextChanged="tbxFiltre_TextChanged" />
+        <Label Content="Filtre :" Height="23" HorizontalAlignment="Right" Margin="0,11,139,0" Name="lbFiltre" VerticalAlignment="Top" Width="44" VerticalContentAlignment="Top" Grid.Column="1" />
         <Label Content="0 élements" Height="23" HorizontalAlignment="Left" Margin="93,12,0,0" Name="lnNbItems" VerticalAlignment="Top" Width="93" DataContext="{Binding}" Target="{Binding}" Grid.ColumnSpan="2" />
-        <Button Content="Ouvrir le lien" Height="23" HorizontalAlignment="Left" Margin="12,454,0,0" Name="btnOuvrirUrl" VerticalAlignment="Top" Width="107" Click="btnOuvrirUrl_Click" />
+        <Button Content="Ouvrir sur Dealabs" Height="23" HorizontalAlignment="Left" Margin="12,454,0,0" Name="btnOuvrirUrl" VerticalAlignment="Top" Width="107" Click="btnOuvrirUrl_Click" />
         <TextBlock x:Name="UpdateText" Grid.Column="1" HorizontalAlignment="Left" Margin="7,17,0,0" TextWrapping="Wrap" Text="Mise à jour ..." VerticalAlignment="Top" Height="13" Visibility="Hidden"/>
-        <Image x:Name="ImageDeal" Margin="556,388,12,10" Grid.Column="1"/>
+        <Image x:Name="ImageDeal" Margin="556,386,12,22" Grid.Column="1"/>
+        <Button x:Name="Btn_OuvrirDealExterne" Grid.ColumnSpan="2" Content="Ouvrir le deal" HorizontalAlignment="Left" Margin="133,454,0,0" VerticalAlignment="Top" Width="111" RenderTransformOrigin="-0.144,0.412" Height="23" Click="Btn_OuvrirDealExterne_Click"/>
+        <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="84,458,0,0" TextWrapping="Wrap" Text="Code de réduction :" VerticalAlignment="Top" Width="122"/>
+        <TextBox x:Name="Tbk_Code" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="199,454,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="336" IsEnabled="False"/>
     </Grid>
 </Window>

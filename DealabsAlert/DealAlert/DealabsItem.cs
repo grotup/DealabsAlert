@@ -49,7 +49,7 @@ namespace DealabsAlert
             HtmlWeb html = new HtmlWeb();
             document = html.Load(UrlDealabs);
 
-            HtmlNode NoeudLien = document.DocumentNode.SelectSingleNode("//a[@class='voirledeal']")
+            HtmlNode NoeudLien = document.DocumentNode.SelectSingleNode("//a[@class='voirledeal']");
             if (NoeudLien != null)
             {
                 UrlDeal = NoeudLien.GetAttributeValue("href", string.Empty);

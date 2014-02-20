@@ -44,8 +44,11 @@ namespace DealAlert
             
             lnNbItems.Content = listBox1.Items.Count + " élement(s).";
             btnOuvrirUrl.IsEnabled = false;
+            Btn_OuvrirDealExterne.IsEnabled = false;
+            Tbk_Code.IsReadOnly = true;
 
             LancerWorkerParsing();
+            
         }
 
         private void LancerWorkerParsing()
@@ -62,13 +65,12 @@ namespace DealAlert
             this.listBox1.ItemsSource = this.ListeAffichee;
 
             lnNbItems.Content = listBox1.Items.Count + " élement(s).";
+            LancerWorkerMAJ();
         }
 
         private void WorkerParsing_DoWork(object sender, DoWorkEventArgs e)
         {
             parser.ParserDealItems();
-            // Après tout ça, on lance le worker pour la MAJ des items
-            LancerWorkerMAJ();
         }
 
         private void LancerWorkerMAJ()
@@ -91,6 +93,7 @@ namespace DealAlert
         {
             DateDernierItem = this.ListeAffichee.ElementAt(0).date;
             parser.updateItems();
+            parser.ParserDealItems();
         }
 
         private void worker_UpdateUI(object sender, RunWorkerCompletedEventArgs e)
@@ -143,6 +146,7 @@ namespace DealAlert
                 DealabsItem item = this.ListeAffichee.ElementAt(listBox1.SelectedIndex);
                 lbTitre.Content = item.titre;
                 lbDate.Content = item.date.ToString();
+                Tbk_Code.Text = item.Code;
                 // On cherche à parser l'image seulement si il en a une
                 if (!string.IsNullOrEmpty(item.LinkImage))
                 {
@@ -150,11 +154,19 @@ namespace DealAlert
                     BImageDeal.BeginInit();
                     BImageDeal.UriSource = new Uri(item.LinkImage, UriKind.Absolute);
                     BImageDeal.EndInit();
-                    ImageDeal.Stretch = Stretch.Fill;
+                    //ImageDeal.Stretch = Stretch.Fill;
                     ImageDeal.Source = BImageDeal;
                 }
+                else
+                {
+                    ImageDeal.Source = null;
+                }
+                // Si on a parsé l'URL externe du deal, on met le bouton associé enabled
+                Btn_OuvrirDealExterne.IsEnabled = ! string.IsNullOrEmpty(item.UrlDeal);
+                
                 // On empêche aussi le clic sur le bouton "Ouvrir"
                 btnOuvrirUrl.IsEnabled = true;
+                
             }
             // Sinon, on vide les champs
             else
@@ -185,6 +197,31 @@ namespace DealAlert
             }
         }
 
+
+        private void ShowNotif()
+        {
+            NotificationWindow notif = new NotificationWindow("Nouveaux élements");
+            notif.ShowDialog();
+            Thread.Sleep(10000);
+            notif.Close();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void tbxFiltre_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string ContentFiltre = tbxFiltre.Text;
+            // On filtre directement sur le contenu de la liste
+            this.ListeAffichee = parser.GetList(ContentFiltre);
+            // Et on l'affiche
+            this.listBox1.SelectedIndex = -1;
+            this.listBox1.ItemsSource = this.ListeAffichee;
+            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
+        }
+
         private void btnOuvrirUrl_Click(object sender, RoutedEventArgs e)
         {
             // Si on a une sélection
@@ -192,6 +229,16 @@ namespace DealAlert
             {
                 // On ouvre la page du deal
                 OuvrirURL();
+            }
+        }
+
+        private void Btn_OuvrirDealExterne_Click(object sender, RoutedEventArgs e)
+        {
+            // Si on a une sélection
+            if (listBox1.SelectedIndex != -1)
+            {
+                string Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).UrlDeal;
+                Process.Start(Url);
             }
         }
 
@@ -208,30 +255,6 @@ namespace DealAlert
                 Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).UrlDealabs;
             }
             Process.Start(Url);
-        }
-
-        private void ShowNotif()
-        {
-            NotificationWindow notif = new NotificationWindow("Nouveaux élements");
-            notif.ShowDialog();
-            Thread.Sleep(10000);
-            notif.Close();
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void tbxFiltre_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string ContentFiltre = tbxFiltre.Text;
-            // On filtre directement sur le contenu de la liste
-            this.ListeAffichee = parser.GetList(ContentFiltre);
-            // Et on l'affiche
-            this.listBox1.SelectedIndex = -1;
-            this.listBox1.ItemsSource = this.ListeAffichee;
-            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
         }
     }
 }
