@@ -30,6 +30,7 @@ namespace DealAlert
         DealabsParser parser;
         DateTime DateDernierItem;
         List<DealabsItem> ListeAffichee;
+        DealabsItem ItemSelectionne;
 
         public DealabsAlert()
         {
@@ -47,30 +48,8 @@ namespace DealAlert
             Btn_OuvrirDealExterne.IsEnabled = false;
             Tbk_Code.IsReadOnly = true;
 
-            LancerWorkerParsing();
-            
-        }
-
-        private void LancerWorkerParsing()
-        {
-            BackgroundWorker WorkerParsing = new BackgroundWorker();
-            WorkerParsing.DoWork += WorkerParsing_DoWork;
-            WorkerParsing.RunWorkerCompleted += WorkerParsing_End;
-            WorkerParsing.RunWorkerAsync();
-        }
-
-        private void WorkerParsing_End(object sender, RunWorkerCompletedEventArgs e)
-        {
-            this.ListeAffichee = parser.GetList(string.Empty);
-            this.listBox1.ItemsSource = this.ListeAffichee;
-
-            lnNbItems.Content = listBox1.Items.Count + " élement(s).";
             LancerWorkerMAJ();
-        }
-
-        private void WorkerParsing_DoWork(object sender, DoWorkEventArgs e)
-        {
-            parser.ParserDealItems();
+            
         }
 
         private void LancerWorkerMAJ()
@@ -143,26 +122,14 @@ namespace DealAlert
             // Si une ligne est sélectionnée dans la liste, on initialise les champs avec la valeur du deal
             if (listBox1.SelectedIndex != -1)
             {
-                DealabsItem item = this.ListeAffichee.ElementAt(listBox1.SelectedIndex);
-                lbTitre.Content = item.titre;
-                lbDate.Content = item.date.ToString();
-                Tbk_Code.Text = item.Code;
-                // On cherche à parser l'image seulement si il en a une
-                if (!string.IsNullOrEmpty(item.LinkImage))
-                {
-                    BitmapImage BImageDeal = new BitmapImage();
-                    BImageDeal.BeginInit();
-                    BImageDeal.UriSource = new Uri(item.LinkImage, UriKind.Absolute);
-                    BImageDeal.EndInit();
-                    //ImageDeal.Stretch = Stretch.Fill;
-                    ImageDeal.Source = BImageDeal;
-                }
-                else
-                {
-                    ImageDeal.Source = null;
-                }
-                // Si on a parsé l'URL externe du deal, on met le bouton associé enabled
-                Btn_OuvrirDealExterne.IsEnabled = ! string.IsNullOrEmpty(item.UrlDeal);
+                ItemSelectionne = this.ListeAffichee.ElementAt(listBox1.SelectedIndex);
+                lbTitre.Content = ItemSelectionne.titre;
+                lbDate.Content = ItemSelectionne.date.ToString();
+
+                ImageDeal.Source = null;
+                Tbk_Code.Text = string.Empty;
+
+                LancerWorkerParsing();
                 
                 // On empêche aussi le clic sur le bouton "Ouvrir"
                 btnOuvrirUrl.IsEnabled = true;
@@ -175,6 +142,47 @@ namespace DealAlert
                 lbTitre.Content = string.Empty;
                 lbDate.Content = string.Empty;
             }
+        }
+
+        private void LancerWorkerParsing()
+        {
+            BackgroundWorker WorkerParsing = new BackgroundWorker();
+            WorkerParsing.DoWork += WorkerParsing_DoWork;
+            WorkerParsing.RunWorkerCompleted += WorkerParsing_End;
+            WorkerParsing.RunWorkerAsync();
+        }
+
+        private void WorkerParsing_DoWork(object sender, DoWorkEventArgs e)
+        {
+            this.ItemSelectionne.ParserCode();
+            this.ItemSelectionne.ParserImage();
+            this.ItemSelectionne.ParserUrlDeal();
+        }
+
+        private void WorkerParsing_End(object sender, RunWorkerCompletedEventArgs e)
+        {
+            // On lance la méthode de MAJ de l'item
+            UpdateItemAffiche();
+        }
+
+        private void UpdateItemAffiche()
+        {
+            Tbk_Code.Text = ItemSelectionne.ParserCode();
+            // On cherche à parser l'image seulement si il en a une
+            if (!string.IsNullOrEmpty(ItemSelectionne.LinkImage))
+            {
+                BitmapImage BImageDeal = new BitmapImage();
+                BImageDeal.BeginInit();
+                BImageDeal.UriSource = new Uri(ItemSelectionne.ParserImage(), UriKind.Absolute);
+                BImageDeal.EndInit();
+                //ImageDeal.Stretch = Stretch.Fill;
+                ImageDeal.Source = BImageDeal;
+            }
+            else
+            {
+                ImageDeal.Source = null;
+            }
+            Btn_OuvrirDealExterne.IsEnabled = !string.IsNullOrEmpty(ItemSelectionne.UrlDealabs);
         }
 
         private void btnActualiser_Click(object sender, RoutedEventArgs e)
@@ -237,7 +245,7 @@ namespace DealAlert
             // Si on a une sélection
             if (listBox1.SelectedIndex != -1)
             {
-                string Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).UrlDeal;
+                string Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).ParserUrlDeal();
                 Process.Start(Url);
             }
         }

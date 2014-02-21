@@ -29,7 +29,7 @@ namespace DealabsAlert
             return titre;
         }
 
-        public bool ParserImage()
+        public string ParserImage()
         {
             HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
             HtmlWeb html = new HtmlWeb();
@@ -40,10 +40,10 @@ namespace DealabsAlert
             {
                 LinkImage = NoeudLien.GetAttributeValue("content", string.Empty);
             }
-            return !string.IsNullOrEmpty(LinkImage);
+            return LinkImage;
         }
 
-        public bool ParserUrlDeal()
+        public string ParserUrlDeal()
         {
             HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
             HtmlWeb html = new HtmlWeb();
@@ -54,10 +54,10 @@ namespace DealabsAlert
             {
                 UrlDeal = NoeudLien.GetAttributeValue("href", string.Empty);
             }
-            return !string.IsNullOrEmpty(UrlDeal);
+            return UrlDeal;
         }
 
-        public bool ParserCode()
+        public string ParserCode()
         {
             HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
             HtmlWeb html = new HtmlWeb();
@@ -68,7 +68,7 @@ namespace DealabsAlert
             {
                 Code = NoeudLien.GetAttributeValue("value", string.Empty);
             }
-            return !string.IsNullOrEmpty(Code);
+            return Code;
         }
     }
 }
