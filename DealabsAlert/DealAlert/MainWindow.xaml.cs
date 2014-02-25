@@ -19,6 +19,7 @@ using System.Diagnostics;
 using System.Windows.Shell;
 using System.Windows.Threading;
 using System.ComponentModel;
+using log4net;
 
 namespace DealAlert
 {
@@ -27,6 +28,8 @@ namespace DealAlert
     /// </summary>
     public partial class DealabsAlert : Window
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(DealabsAlert));
+
         DealabsParser parser;
         DateTime DateDernierItem;
         List<DealabsItem> ListeAffichee;
@@ -34,6 +37,7 @@ namespace DealAlert
 
         public DealabsAlert()
         {
+            log.Debug("Coucou !");
             InitializeComponent();
             parser = new DealabsParser(ConfigurationSettings.AppSettings["url"], Convert.ToInt16(ConfigurationSettings.AppSettings["refreshMinutes"]));
             
@@ -72,7 +76,6 @@ namespace DealAlert
         {
             DateDernierItem = this.ListeAffichee.ElementAt(0).date;
             parser.updateItems();
-            parser.ParserDealItems();
         }
 
         private void worker_UpdateUI(object sender, RunWorkerCompletedEventArgs e)
@@ -129,7 +132,10 @@ namespace DealAlert
                 ImageDeal.Source = null;
                 Tbk_Code.Text = string.Empty;
 
-                LancerWorkerParsing();
+                if (string.IsNullOrEmpty(ItemSelectionne.LinkImage))
+                {
+                    LancerWorkerParsing();
+                }
                 
                 // On empêche aussi le clic sur le bouton "Ouvrir"
                 btnOuvrirUrl.IsEnabled = true;
@@ -175,7 +181,6 @@ namespace DealAlert
                 BImageDeal.BeginInit();
                 BImageDeal.UriSource = new Uri(ItemSelectionne.ParserImage(), UriKind.Absolute);
                 BImageDeal.EndInit();
-                //ImageDeal.Stretch = Stretch.Fill;
                 ImageDeal.Source = BImageDeal;
             }
             else

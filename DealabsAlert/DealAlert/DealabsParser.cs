@@ -49,12 +49,18 @@ namespace DealabsAlert
             // Pour chaque item
             foreach (XmlNode item in listItems)
             {
-                
                 // On crée un objet qu'on ajoute dans la liste
                 string date = item.SelectSingleNode("pubDate").InnerText;
                 DateTime DateFormatted = Convert.ToDateTime(date);
-                DealabsItem ItemToAdd = new DealabsItem(item.SelectSingleNode("link").InnerText, item.SelectSingleNode("title").InnerText, DateFormatted, item.SelectSingleNode("description").InnerText);
-                retList.Add(ItemToAdd);
+                if (DateFormatted.CompareTo(DateDernierItem) > 0)
+                {
+                    DealabsItem ItemToAdd = new DealabsItem(item.SelectSingleNode("link").InnerText, item.SelectSingleNode("title").InnerText, DateFormatted, item.SelectSingleNode("description").InnerText);
+                    retList.Add(ItemToAdd);
+                }
+                else
+                {
+                    break;
+                }
                 // On décrémente, et si on est à 0 on break;
                 nbItemsMax--;
                 // Si on a parsé 100 items, on arrête.
@@ -64,8 +70,17 @@ namespace DealabsAlert
                 }
             }
             // On définit le dernier item daté
-            this.AlllistItems = retList;
+            // this.AlllistItems = retList;
+            MergerListePrincipale(retList);
             this.DateDernierItem = AlllistItems.ElementAt(0).date;
+        }
+
+        private void MergerListePrincipale(List<DealabsItem> tmp)
+        {
+            for (int i = tmp.Count - 1; i >= 0; i--)
+            {
+                this.AlllistItems.Insert(0, tmp.ElementAt(i));
+            }
         }
 
         /// <summary>
