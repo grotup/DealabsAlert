@@ -37,21 +37,26 @@ namespace DealAlert
 
         public DealabsAlert()
         {
-            log.Debug("Coucou !");
+            log.Debug("Lancement application");
             InitializeComponent();
+            log.Debug("Initialisation configuration");
             parser = new DealabsParser(ConfigurationSettings.AppSettings["url"], Convert.ToInt16(ConfigurationSettings.AppSettings["refreshMinutes"]));
             
             // On fait un premier update
+            log.Debug("Premier update Dealabs");
             parser.updateItems();
 
+            log.Debug("Affichage de la liste dans l'interface");
             this.ListeAffichee = parser.GetList(string.Empty);
             this.listBox1.ItemsSource = this.ListeAffichee;
             
+            log.Debug("Mise à jour élements interface");
             lnNbItems.Content = listBox1.Items.Count + " élement(s).";
             btnOuvrirUrl.IsEnabled = false;
             Btn_OuvrirDealExterne.IsEnabled = false;
             Tbk_Code.IsReadOnly = true;
 
+            log.Debug("Lancement du worker de mise à jour");
             LancerWorkerMAJ();
             
         }
@@ -75,6 +80,7 @@ namespace DealAlert
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
             DateDernierItem = this.ListeAffichee.ElementAt(0).date;
+            log.Debug("Update dealabs en tache de fond");
             parser.updateItems();
         }
 
@@ -82,10 +88,12 @@ namespace DealAlert
         {
             if ((parser.DateDernierItem.CompareTo(DateDernierItem) > 0))
             {
+                log.Debug("Récupération des nouveaux items");
                 List<DealabsItem> liste = parser.getNouveauxDeals(DateDernierItem);
                 // Si on a un filtre de défini, on boucle, sinon, on pop juste le nombre d'items nouveaux
                 string filtre = ConfigurationSettings.AppSettings["filtre"];
                 // On définit le message à comme étant le nombre de nouveaux deals
+                log.Debug(liste.Count + " nouveaux deal(s)");
                 string message = liste.Count + " nouveaux deal(s) !";
                 // Si on a un filtre, on boucle
                 if (!string.IsNullOrEmpty(filtre))
@@ -95,20 +103,25 @@ namespace DealAlert
                         // Si on trouve un item, on définit le message comme étant le titre du deal
                         if (liste.ElementAt(i).titre.Contains(filtre))
                         {
+                            log.Debug("Nouvel item correspondant au filtre : " + liste.ElementAt(i).titre);
                             message = liste.ElementAt(i).titre;
                         }
                     }
                 }
+                log.Debug("Appel de la notification");
                 // On affiche la notification
                 NotificationWindow window = new NotificationWindow(message);
                 window.Show();
             }
+            log.Debug("Valeur de filtre interface : " + tbxFiltre.Text);
             // Si on a un filtre actif, on refresh pas la vue
             if(string.IsNullOrEmpty(tbxFiltre.Text))
             {
                 // On garde la sélection dans la liste
                 int Selected = listBox1.SelectedIndex;
                 this.ListeAffichee = parser.GetList(string.Empty);
+                log.Debug("Nombre d'items liste affichée : " + this.ListeAffichee.Count);
+                listBox1.ItemsSource = null;
                 listBox1.ItemsSource = this.ListeAffichee;
 
                 if(Selected != -1)
@@ -122,6 +135,7 @@ namespace DealAlert
 
         private void listBox1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            log.Debug("Sélection d'un item - Index = " + listBox1.SelectedIndex);
             // Si une ligne est sélectionnée dans la liste, on initialise les champs avec la valeur du deal
             if (listBox1.SelectedIndex != -1)
             {
@@ -134,12 +148,12 @@ namespace DealAlert
 
                 if (string.IsNullOrEmpty(ItemSelectionne.LinkImage))
                 {
+                    log.Debug("Pas d'image dans l'item. Parsing de l'item...");
                     LancerWorkerParsing();
                 }
-                
                 // On empêche aussi le clic sur le bouton "Ouvrir"
                 btnOuvrirUrl.IsEnabled = true;
-                
+                UpdateItemAffiche();
             }
             // Sinon, on vide les champs
             else
@@ -173,13 +187,13 @@ namespace DealAlert
 
         private void UpdateItemAffiche()
         {
-            Tbk_Code.Text = ItemSelectionne.ParserCode();
+            Tbk_Code.Text = ItemSelectionne.Code;
             // On cherche à parser l'image seulement si il en a une
             if (!string.IsNullOrEmpty(ItemSelectionne.LinkImage))
             {
                 BitmapImage BImageDeal = new BitmapImage();
                 BImageDeal.BeginInit();
-                BImageDeal.UriSource = new Uri(ItemSelectionne.ParserImage(), UriKind.Absolute);
+                BImageDeal.UriSource = new Uri(ItemSelectionne.LinkImage, UriKind.Absolute);
                 BImageDeal.EndInit();
                 ImageDeal.Source = BImageDeal;
             }

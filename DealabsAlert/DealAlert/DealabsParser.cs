@@ -9,11 +9,14 @@ using System.Configuration;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using DealAlert;
+using log4net;
 
 namespace DealabsAlert
 {
     class DealabsParser
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(DealabsParser));
+
         private string url;
         private int nbMinutes;
         private List<DealabsItem> AlllistItems = new List<DealabsItem>();
@@ -35,6 +38,8 @@ namespace DealabsAlert
         /// </summary>
         internal void updateItems()
         {
+            log.Debug("Entrée dans la méthode 'updateItem'");
+            long TickEntree = DateTime.Now.Ticks;
             List<DealabsItem> retList = new List<DealabsItem>();
             // On ouvre un stream
             Stream stream = getStreamRSS();
@@ -69,10 +74,13 @@ namespace DealabsAlert
                     break;
                 }
             }
+            long Duree = DateTime.Now.Ticks - TickEntree;
+            log.Debug("Durée de l'update = " + new TimeSpan(Duree).TotalMilliseconds + "ms");
+
             // On définit le dernier item daté
-            // this.AlllistItems = retList;
             MergerListePrincipale(retList);
             this.DateDernierItem = AlllistItems.ElementAt(0).date;
+            
         }
 
         private void MergerListePrincipale(List<DealabsItem> tmp)

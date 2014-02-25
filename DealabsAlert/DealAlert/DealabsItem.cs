@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,8 @@ namespace DealabsAlert
 {
     class DealabsItem
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(DealabsItem));
+
         public string UrlDealabs;
         public string UrlDeal = string.Empty;
         public string Code = string.Empty;
@@ -31,6 +34,7 @@ namespace DealabsAlert
 
         public string ParserImage()
         {
+            log.Debug("Entrée dans la méthode 'ParserImage'");
             HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
             HtmlWeb html = new HtmlWeb();
             document = html.Load(UrlDealabs);
@@ -40,11 +44,13 @@ namespace DealabsAlert
             {
                 LinkImage = NoeudLien.GetAttributeValue("content", string.Empty);
             }
+            log.Debug("Sortie de la méthode 'ParserImage'. Valeur de sortie : " + LinkImage);
             return LinkImage;
         }
 
         public string ParserUrlDeal()
         {
+            log.Debug("Entrée dans la méthode 'ParserUrlDeal'");
             HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
             HtmlWeb html = new HtmlWeb();
             document = html.Load(UrlDealabs);
@@ -54,11 +60,13 @@ namespace DealabsAlert
             {
                 UrlDeal = NoeudLien.GetAttributeValue("href", string.Empty);
             }
+            log.Debug("Sortie de la méthode 'ParserUrlDeal'. Valeur de sortie : " + UrlDeal);
             return UrlDeal;
         }
 
         public string ParserCode()
         {
+            log.Debug("Entrée dans la méthode 'ParserCode'");
             HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
             HtmlWeb html = new HtmlWeb();
             document = html.Load(UrlDealabs);
@@ -68,6 +76,7 @@ namespace DealabsAlert
             {
                 Code = NoeudLien.GetAttributeValue("value", string.Empty);
             }
+            log.Debug("Sortie de la méthode 'ParserCode'. Valeur de sortie : " + Code);
             return Code;
         }
     }
