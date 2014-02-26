@@ -9,7 +9,7 @@
             <ColumnDefinition Width="716" />
         </Grid.ColumnDefinitions>
         <ListBox Height="339" Margin="12,41,12,0" Name="listBox1" VerticalAlignment="Top" SelectionChanged="listBox1_SelectionChanged" MouseDoubleClick="listBox1_MouseDoubleClick" Grid.ColumnSpan="2" />
-        <Label Height="28" Margin="12,386,181,0" Name="lbTitre" VerticalAlignment="Top" Grid.ColumnSpan="2" />
+        <Label Height="28" Margin="12,386,292,0" Name="lbTitre" VerticalAlignment="Top" Grid.ColumnSpan="2" />
         <Label Height="28" Margin="12,420,181,0" Name="lbDate" VerticalAlignment="Top" Grid.ColumnSpan="2" />
         <Button Content="Actualiser" Height="23" HorizontalAlignment="Left" Margin="12,12,0,0" Name="btnActualiser" VerticalAlignment="Top" Width="75" Click="btnActualiser_Click" />
         <TextBox Height="23" HorizontalAlignment="Right" Margin="0,11,13,0" Name="tbxFiltre" VerticalAlignment="Top" Width="120" Grid.Column="1" TextChanged="tbxFiltre_TextChanged" />
@@ -21,5 +21,6 @@
         <Button x:Name="Btn_OuvrirDealExterne" Grid.ColumnSpan="2" Content="Ouvrir le deal" HorizontalAlignment="Left" Margin="133,454,0,0" VerticalAlignment="Top" Width="111" RenderTransformOrigin="-0.144,0.412" Height="23" Click="Btn_OuvrirDealExterne_Click"/>
         <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="84,458,0,0" TextWrapping="Wrap" Text="Code de réduction :" VerticalAlignment="Top" Width="122"/>
         <TextBox x:Name="Tbk_Code" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="199,454,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="336" IsEnabled="False"/>
+        <Label x:Name="lbHot" Content="" Grid.Column="1" HorizontalAlignment="Left" Margin="429,386,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.789,0.5" Height="28" Width="106"/>
     </Grid>
 </Window>

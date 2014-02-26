@@ -146,11 +146,8 @@ namespace DealAlert
                 ImageDeal.Source = null;
                 Tbk_Code.Text = string.Empty;
 
-                if (string.IsNullOrEmpty(ItemSelectionne.LinkImage))
-                {
-                    log.Debug("Pas d'image dans l'item. Parsing de l'item...");
-                    LancerWorkerParsing();
-                }
+                LancerWorkerParsing();
+
                 // On empêche aussi le clic sur le bouton "Ouvrir"
                 btnOuvrirUrl.IsEnabled = true;
                 UpdateItemAffiche();
@@ -174,9 +171,14 @@ namespace DealAlert
 
         private void WorkerParsing_DoWork(object sender, DoWorkEventArgs e)
         {
-            this.ItemSelectionne.ParserCode();
-            this.ItemSelectionne.ParserImage();
-            this.ItemSelectionne.ParserUrlDeal();
+            if (string.IsNullOrEmpty(ItemSelectionne.LinkImage))
+            {
+                log.Debug("Pas d'image dans l'item. Parsing de l'item...");
+                this.ItemSelectionne.ParserCode();
+                this.ItemSelectionne.ParserImage();
+                this.ItemSelectionne.ParserUrlDeal();
+            }
+            this.ItemSelectionne.ParserDegre();
         }
 
         private void WorkerParsing_End(object sender, RunWorkerCompletedEventArgs e)
@@ -201,6 +203,7 @@ namespace DealAlert
             {
                 ImageDeal.Source = null;
             }
+            lbHot.Content = ItemSelectionne.Degre;
             Btn_OuvrirDealExterne.IsEnabled = !string.IsNullOrEmpty(ItemSelectionne.UrlDealabs);
         }
 

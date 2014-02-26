@@ -18,6 +18,7 @@ namespace DealabsAlert
         public DateTime date;
         public string description;
         public string LinkImage = string.Empty;
+        public string Degre;
 
         public DealabsItem(string url, string titre, DateTime date, string Description)
         {
@@ -78,6 +79,22 @@ namespace DealabsAlert
             }
             log.Debug("Sortie de la méthode 'ParserCode'. Valeur de sortie : " + Code);
             return Code;
+        }
+
+        public string ParserDegre()
+        {
+            log.Debug("Entrée dans la méthode 'ParserDegre'");
+            HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
+            HtmlWeb html = new HtmlWeb();
+            document = html.Load(UrlDealabs);
+
+            HtmlNode NoeudLien = document.DocumentNode.SelectSingleNode("//div[starts-with(@id,'GetHotImage_color_')]");
+            if (NoeudLien != null)
+            {
+                Degre = NoeudLien.InnerText;
+            }
+            log.Debug("Sortie de la méthode 'ParserDegre'. Valeur de sortie : " + Degre);
+            return Degre;
         }
     }
 }
