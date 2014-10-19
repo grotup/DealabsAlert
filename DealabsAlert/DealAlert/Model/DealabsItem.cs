@@ -19,6 +19,7 @@ namespace DealabsAlert
         public string description;
         public string LinkImage = string.Empty;
         public string Degre;
+        private HtmlDocument Document;
 
         public DealabsItem(string url, string titre, DateTime date, string Description)
         {
@@ -26,6 +27,7 @@ namespace DealabsAlert
             this.titre = titre;
             this.date = date;
             this.description = Description;
+            this.Document = GetHtmlDocument();
         }
 
         public override string ToString()
@@ -33,14 +35,15 @@ namespace DealabsAlert
             return titre;
         }
 
+        /// <summary>
+        /// Fonction qui renvoie l'URL de l'image associée au deal
+        /// </summary>
+        /// <returns>L'URL de l'image associée au deal</returns>
         public string ParserImage()
         {
             log.Debug("Entrée dans la méthode 'ParserImage'");
-            HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
-            HtmlWeb html = new HtmlWeb();
-            document = html.Load(UrlDealabs);
 
-            HtmlNode NoeudLien = document.DocumentNode.SelectSingleNode("//meta[@property='og:image']");
+            HtmlNode NoeudLien = Document.DocumentNode.SelectSingleNode("//meta[@property='og:image']");
             if (NoeudLien != null)
             {
                 LinkImage = NoeudLien.GetAttributeValue("content", string.Empty);
@@ -49,14 +52,15 @@ namespace DealabsAlert
             return LinkImage;
         }
 
+        /// <summary>
+        /// Fonction qui renvoie l'URL du deal
+        /// </summary>
+        /// <returns>L'URL du deal</returns>
         public string ParserUrlDeal()
         {
             log.Debug("Entrée dans la méthode 'ParserUrlDeal'");
-            HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
-            HtmlWeb html = new HtmlWeb();
-            document = html.Load(UrlDealabs);
 
-            HtmlNode NoeudLien = document.DocumentNode.SelectSingleNode("//a[@class='voirledeal']");
+            HtmlNode NoeudLien = Document.DocumentNode.SelectSingleNode("//a[@class='voirledeal']");
             if (NoeudLien != null)
             {
                 UrlDeal = NoeudLien.GetAttributeValue("href", string.Empty);
@@ -65,14 +69,15 @@ namespace DealabsAlert
             return UrlDeal;
         }
 
+        /// <summary>
+        /// Fonction qui renvoie le code associé au deal
+        /// </summary>
+        /// <returns>Le code du deal</returns>
         public string ParserCode()
         {
             log.Debug("Entrée dans la méthode 'ParserCode'");
-            HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
-            HtmlWeb html = new HtmlWeb();
-            document = html.Load(UrlDealabs);
 
-            HtmlNode NoeudLien = document.DocumentNode.SelectSingleNode("//input[starts-with(@id,'voucher_code')]");
+            HtmlNode NoeudLien = Document.DocumentNode.SelectSingleNode("//input[starts-with(@id,'voucher_code')]");
             if (NoeudLien != null)
             {
                 Code = NoeudLien.GetAttributeValue("value", string.Empty);
@@ -81,20 +86,34 @@ namespace DealabsAlert
             return Code;
         }
 
+        /// <summary>
+        /// Fonction qui renvoie la "chaleur" du deal
+        /// </summary>
+        /// <returns>La "chaleur" du deal</returns>
         public string ParserDegre()
         {
             log.Debug("Entrée dans la méthode 'ParserDegre'");
-            HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
-            HtmlWeb html = new HtmlWeb();
-            document = html.Load(UrlDealabs);
-
-            HtmlNode NoeudLien = document.DocumentNode.SelectSingleNode("//div[starts-with(@id,'GetHotImage_color_')]");
+            HtmlNode NoeudLien = Document.DocumentNode.SelectSingleNode("//div[@class='temperature_div']/p");
+            //HtmlNode NoeudLien = Document.DocumentNode.SelectSingleNode("//div[starts-with(@id,'GetHotImage_color_')]");
             if (NoeudLien != null)
             {
                 Degre = NoeudLien.InnerText;
             }
             log.Debug("Sortie de la méthode 'ParserDegre'. Valeur de sortie : " + Degre);
             return Degre;
+        }
+
+        /// <summary>
+        /// Méthode qui charge un HTMLDocument à partir de l'URL de Dealabs
+        /// </summary>
+        /// <returns></returns>
+        private HtmlDocument GetHtmlDocument()
+        {
+            log.Debug("Génération d'un HTMLDocument");
+            HtmlAgilityPack.HtmlDocument document = new HtmlDocument();
+            HtmlWeb html = new HtmlWeb();
+            document = html.Load(UrlDealabs);
+            return document;
         }
     }
 }

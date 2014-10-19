@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using NUnit.Framework;
 using DealabsAlert;
 using System.IO;
 
 namespace DealAlert.Test
 {
+    [TestFixture]
     class ParserTest
     {
         [Test]

@@ -1,7 +1,7 @@
 ﻿<Window x:Class="DealAlert.DealabsAlert"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="DealabsAlert" Height="527" Width="901" ResizeMode="CanMinimize" Loaded="Window_Loaded" Icon="favicon.ico">
+    Title="DealabsAlert" Height="527" Width="901" ResizeMode="CanMinimize" Loaded="Window_Loaded" Icon="resources\favicon.ico">
     
     <Grid Background="#FF078298">
         <Grid.ColumnDefinitions>
