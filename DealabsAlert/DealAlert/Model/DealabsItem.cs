@@ -7,7 +7,7 @@ using System.Text;
 
 namespace DealabsAlert
 {
-    class DealabsItem
+    public class DealabsItem
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(DealabsItem));
 
@@ -20,6 +20,7 @@ namespace DealabsAlert
         public string LinkImage = string.Empty;
         public string Degre;
         private HtmlDocument Document;
+        private Parser NodeParser;
 
         public DealabsItem(string url, string titre, DateTime date, string Description)
         {
@@ -28,11 +29,50 @@ namespace DealabsAlert
             this.date = date;
             this.description = Description;
             this.Document = GetHtmlDocument();
+            this.NodeParser = new Parser(this.Document);
         }
 
         public override string ToString()
         {
             return titre;
+        }
+
+        private class Parser
+        {
+            private HtmlNode NoeudLien;
+            private string Link;
+            private HtmlDocument Document;
+
+            internal Parser(HtmlDocument Document)
+            {
+                this.Document = Document;
+            }
+
+            public Parser forNode(string node)
+            {
+                NoeudLien = Document.DocumentNode.SelectSingleNode(node);
+                return this;
+            }
+
+            public string getAttribute(string attributeValue)
+            {
+                if (NoeudLien != null)
+                {
+                    Link = NoeudLien.GetAttributeValue(attributeValue, string.Empty);
+                }
+                //LOG ?
+                return Link;
+            }
+
+            public string getInnerText()
+            {
+                if (NoeudLien != null)
+                {
+                    Link = NoeudLien.InnerText;
+                }
+                //LOG ?
+                return Link;
+            }
         }
 
         /// <summary>
@@ -41,15 +81,7 @@ namespace DealabsAlert
         /// <returns>L'URL de l'image associée au deal</returns>
         public string ParserImage()
         {
-            log.Debug("Entrée dans la méthode 'ParserImage'");
-
-            HtmlNode NoeudLien = Document.DocumentNode.SelectSingleNode("//meta[@property='og:image']");
-            if (NoeudLien != null)
-            {
-                LinkImage = NoeudLien.GetAttributeValue("content", string.Empty);
-            }
-            log.Debug("Sortie de la méthode 'ParserImage'. Valeur de sortie : " + LinkImage);
-            return LinkImage;
+            return this.LinkImage = NodeParser.forNode("//meta[@property='og:image']").getAttribute("content");
         }
 
         /// <summary>
@@ -58,15 +90,7 @@ namespace DealabsAlert
         /// <returns>L'URL du deal</returns>
         public string ParserUrlDeal()
         {
-            log.Debug("Entrée dans la méthode 'ParserUrlDeal'");
-
-            HtmlNode NoeudLien = Document.DocumentNode.SelectSingleNode("//a[@class='voirledeal']");
-            if (NoeudLien != null)
-            {
-                UrlDeal = NoeudLien.GetAttributeValue("href", string.Empty);
-            }
-            log.Debug("Sortie de la méthode 'ParserUrlDeal'. Valeur de sortie : " + UrlDeal);
-            return UrlDeal;
+            return this.UrlDeal = NodeParser.forNode("//a[@class='voirledeal']").getAttribute("href");
         }
 
         /// <summary>
@@ -75,15 +99,7 @@ namespace DealabsAlert
         /// <returns>Le code du deal</returns>
         public string ParserCode()
         {
-            log.Debug("Entrée dans la méthode 'ParserCode'");
-
-            HtmlNode NoeudLien = Document.DocumentNode.SelectSingleNode("//input[starts-with(@id,'voucher_code')]");
-            if (NoeudLien != null)
-            {
-                Code = NoeudLien.GetAttributeValue("value", string.Empty);
-            }
-            log.Debug("Sortie de la méthode 'ParserCode'. Valeur de sortie : " + Code);
-            return Code;
+            return this.Code = NodeParser.forNode("//input[starts-with(@id,'voucher_code')]").getAttribute("value");
         }
 
         /// <summary>
@@ -92,15 +108,7 @@ namespace DealabsAlert
         /// <returns>La "chaleur" du deal</returns>
         public string ParserDegre()
         {
-            log.Debug("Entrée dans la méthode 'ParserDegre'");
-            HtmlNode NoeudLien = Document.DocumentNode.SelectSingleNode("//div[@class='temperature_div']/p");
-            //HtmlNode NoeudLien = Document.DocumentNode.SelectSingleNode("//div[starts-with(@id,'GetHotImage_color_')]");
-            if (NoeudLien != null)
-            {
-                Degre = NoeudLien.InnerText;
-            }
-            log.Debug("Sortie de la méthode 'ParserDegre'. Valeur de sortie : " + Degre);
-            return Degre;
+            return this.Degre = NodeParser.forNode("//div[@class='temperature_div']/p").getInnerText();
         }
 
         /// <summary>
