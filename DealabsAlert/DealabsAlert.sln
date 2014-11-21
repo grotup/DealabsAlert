@@ -1,25 +1,54 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DealAlert", "DealAlert\DealAlert.csproj", "{16748D4F-3B38-4323-9E28-EC7A552FAFA6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{507E5A1F-0DAA-4464-A205-2CF02587117F}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\packages.config = .nuget\packages.config
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DealabsAlertTest", "DealabsAlertTest\DealabsAlertTest.csproj", "{406AA393-996C-431C-9E93-0948D26DCFC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DealabsParser", "DealabsParser\DealabsParser.csproj", "{6A913001-8DAD-4B6D-BC92-1B94797B70D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{16748D4F-3B38-4323-9E28-EC7A552FAFA6}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{16748D4F-3B38-4323-9E28-EC7A552FAFA6}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{16748D4F-3B38-4323-9E28-EC7A552FAFA6}.Debug|Mixed Platforms.Build.0 = Debug|x86
 		{16748D4F-3B38-4323-9E28-EC7A552FAFA6}.Debug|x86.ActiveCfg = Debug|x86
 		{16748D4F-3B38-4323-9E28-EC7A552FAFA6}.Debug|x86.Build.0 = Debug|x86
+		{16748D4F-3B38-4323-9E28-EC7A552FAFA6}.Release|Any CPU.ActiveCfg = Release|x86
+		{16748D4F-3B38-4323-9E28-EC7A552FAFA6}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{16748D4F-3B38-4323-9E28-EC7A552FAFA6}.Release|Mixed Platforms.Build.0 = Release|x86
 		{16748D4F-3B38-4323-9E28-EC7A552FAFA6}.Release|x86.ActiveCfg = Release|x86
 		{16748D4F-3B38-4323-9E28-EC7A552FAFA6}.Release|x86.Build.0 = Release|x86
+		{406AA393-996C-431C-9E93-0948D26DCFC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{406AA393-996C-431C-9E93-0948D26DCFC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{406AA393-996C-431C-9E93-0948D26DCFC3}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{406AA393-996C-431C-9E93-0948D26DCFC3}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{406AA393-996C-431C-9E93-0948D26DCFC3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{406AA393-996C-431C-9E93-0948D26DCFC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{406AA393-996C-431C-9E93-0948D26DCFC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{406AA393-996C-431C-9E93-0948D26DCFC3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{406AA393-996C-431C-9E93-0948D26DCFC3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{406AA393-996C-431C-9E93-0948D26DCFC3}.Release|x86.ActiveCfg = Release|Any CPU
+		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

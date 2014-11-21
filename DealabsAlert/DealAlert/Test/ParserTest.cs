@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 using NUnit.Framework;
-using DealabsAlert;
-using System.IO;
+using DealabsParser.Parser;
+using DealabsParser.Model;
 
 namespace DealAlert.Test
 {
@@ -15,7 +16,7 @@ namespace DealAlert.Test
         [Test]
         public void parserRSSTest()
         {
-            DealabsParser parser = new DealabsParser("flux1.xml", 2);
+            DealabsRssParser parser = new DealabsRssParser("flux1.xml", 2, int.MaxValue);
             parser.updateItems();
 
             Assert.IsTrue(parser.GetList(string.Empty).Count == 27);
@@ -24,7 +25,7 @@ namespace DealAlert.Test
         [Test]
         public void GetListSansFiltre()
         {
-            DealabsParser parser = new DealabsParser("flux1.xml", 2);
+            DealabsRssParser parser = new DealabsRssParser("flux1.xml", 2, int.MaxValue);
             parser.updateItems();
 
             List<DealabsItem> ItemsFiltres = parser.GetList("");
@@ -35,7 +36,7 @@ namespace DealAlert.Test
         [Test]
         public void GetListAvecFiltre()
         {
-            DealabsParser parser = new DealabsParser("flux1.xml", 2);
+            DealabsRssParser parser = new DealabsRssParser("flux1.xml", 2, int.MaxValue);
             parser.updateItems();
 
             List<DealabsItem> ItemsFiltres = parser.GetList("CDiscount");
@@ -46,7 +47,7 @@ namespace DealAlert.Test
         [Test]
         public void GetNouveauxDealsTest()
         {
-            DealabsParser parser = new DealabsParser("flux1.xml", 2);
+            DealabsRssParser parser = new DealabsRssParser("flux1.xml", 2, int.MaxValue);
             parser.updateItems();
 
             List<DealabsItem> ListeNouveauxItems = parser.getNouveauxDeals(new DateTime(2014, 2, 13, 18 , 18 , 0 ));

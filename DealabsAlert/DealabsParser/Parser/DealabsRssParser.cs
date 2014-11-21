@@ -8,17 +8,19 @@ using System.Xml;
 using System.Configuration;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using DealAlert;
-using log4net;
 
-namespace DealabsAlert
+using log4net;
+using DealabsParser.Model;
+
+namespace DealabsParser.Parser
 {
-    class DealabsParser
+    public class DealabsRssParser
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(DealabsParser));
+        private static readonly ILog log = LogManager.GetLogger(typeof(DealabsRssParser));
 
         private string url;
         private int nbMinutes;
+        private int nb_items_parsing;
         private List<DealabsItem> AlllistItems = new List<DealabsItem>();
         public DateTime DateDernierItem;
 
@@ -27,16 +29,17 @@ namespace DealabsAlert
         /// </summary>
         /// <param name="url">URL de Dealabs</param>
         /// <param name="nbMinutes"></param>
-        public DealabsParser(string url, int nbMinutes)
+        public DealabsRssParser(string url, int nbMinutes, int nb_items_parsing)
         {
             this.url = url;
             this.nbMinutes = nbMinutes;
+            this.nb_items_parsing = nb_items_parsing;
         }
 
         /// <summary>
         /// Fonction qui rafraichit la liste principale des deals
         /// </summary>
-        internal void updateItems()
+        public void updateItems()
         {
             log.Debug("Entrée dans la méthode 'updateItem'");
             long TickEntree = DateTime.Now.Ticks;
@@ -50,7 +53,7 @@ namespace DealabsAlert
             XmlNodeList listItems = doc.GetElementsByTagName("item");
 
             // On se limite à 100 deals
-            Int16 nbItemsMax = Convert.ToInt16(ConfigurationSettings.AppSettings["nombre_items_parsing"]);
+            int nbItemsMax = nb_items_parsing;
             // Pour chaque item
             foreach (XmlNode item in listItems)
             {
@@ -59,7 +62,11 @@ namespace DealabsAlert
                 DateTime DateFormatted = Convert.ToDateTime(date);
                 if (DateFormatted.CompareTo(DateDernierItem) > 0)
                 {
-                    DealabsItem ItemToAdd = new DealabsItem(item.SelectSingleNode("link").InnerText, item.SelectSingleNode("title").InnerText, DateFormatted, item.SelectSingleNode("description").InnerText);
+                    DealabsItem ItemToAdd = new DealabsItem();
+                    ItemToAdd.UrlDealabs = item.SelectSingleNode("link").InnerText;
+                    ItemToAdd.titre = item.SelectSingleNode("title").InnerText;
+                    ItemToAdd.date = DateFormatted;
+                    ItemToAdd.description = item.SelectSingleNode("description").InnerText;
                     retList.Add(ItemToAdd);
                 }
                 else
@@ -97,10 +104,10 @@ namespace DealabsAlert
         /// <returns>La liste des items</returns>
         public List<DealabsItem> ParserDealItems()
         {
-            foreach (DealabsItem item in AlllistItems){
-                item.ParserImage();
-                item.ParserCode();
-                item.ParserUrlDeal();
+            for (int i = 0; i < AlllistItems.Count; i++)
+            {
+                DealabsItemParser Parser = new DealabsItemParser(AlllistItems[i].UrlDealabs);
+                AlllistItems[i] = Parser.parserDeal(AlllistItems[i]);
             }
 
             return AlllistItems;
@@ -123,7 +130,8 @@ namespace DealabsAlert
                 if (idxDeals < AlllistItems.Count && AlllistItems.ElementAt(idxDeals).date.CompareTo(DateFrom) > 0)
                 {
                     ret.Add(AlllistItems.ElementAt(idxDeals));
-                }else
+                }
+                else
                 {
                     // Dès qu'on a une date équivalente ou inferieure, c'est qu'on n'a plus de nouveaux items
                     sortir = true;

@@ -11,7 +11,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using DealabsAlert;
 using System.Configuration;
 using System.IO;
 using System.Threading;
@@ -20,6 +19,9 @@ using System.Windows.Shell;
 using System.Windows.Threading;
 using System.ComponentModel;
 using log4net;
+
+using DealabsParser.Parser;
+using DealabsParser.Model;
 
 namespace DealAlert
 {
@@ -30,7 +32,7 @@ namespace DealAlert
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(DealabsAlert));
 
-        DealabsParser parser;
+        DealabsRssParser parser;
         DateTime DateDernierItem;
         List<DealabsItem> ListeAffichee;
         DealabsItem ItemSelectionne;
@@ -40,7 +42,7 @@ namespace DealAlert
             log.Debug("Lancement application");
             InitializeComponent();
             log.Debug("Initialisation configuration");
-            parser = new DealabsParser(ConfigurationSettings.AppSettings["url"], Convert.ToInt16(ConfigurationSettings.AppSettings["refreshMinutes"]));
+            parser = new DealabsRssParser(ConfigurationSettings.AppSettings["url"], Convert.ToInt16(ConfigurationSettings.AppSettings["refreshMinutes"]), Convert.ToInt16(ConfigurationSettings.AppSettings["nombre_items_parsing"]));
             
             // On fait un premier update
             log.Debug("Premier update Dealabs");
@@ -171,14 +173,9 @@ namespace DealAlert
 
         private void WorkerParsing_DoWork(object sender, DoWorkEventArgs e)
         {
-            if (string.IsNullOrEmpty(ItemSelectionne.LinkImage))
-            {
-                log.Debug("Pas d'image dans l'item. Parsing de l'item...");
-                this.ItemSelectionne.ParserCode();
-                this.ItemSelectionne.ParserImage();
-                this.ItemSelectionne.ParserUrlDeal();
-            }
-            this.ItemSelectionne.ParserDegre();
+            log.Debug("Pas d'image dans l'item. Parsing de l'item...");
+            DealabsItemParser ItemParser = new DealabsItemParser(this.ItemSelectionne.UrlDealabs);
+            this.ItemSelectionne = ItemParser.parserDeal(this.ItemSelectionne);
         }
 
         private void WorkerParsing_End(object sender, RunWorkerCompletedEventArgs e)
@@ -267,7 +264,7 @@ namespace DealAlert
             // Si on a une sélection
             if (listBox1.SelectedIndex != -1)
             {
-                string Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).ParserUrlDeal();
+                string Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).UrlDealabs;
                 Process.Start(Url);
             }
         }
