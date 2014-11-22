@@ -16,12 +16,29 @@ namespace DealabsParser.Parser
 {
     public class DealabsRssParser
     {
+        /// <summary>
+        /// Logger
+        /// </summary>
         private static readonly ILog log = LogManager.GetLogger(typeof(DealabsRssParser));
 
+        /// <summary>
+        /// L'URL du RSS
+        /// </summary>
         private string url;
-        private int nbMinutes;
+
+        /// <summary>
+        /// Nombre d'items à charger pendant un refresh
+        /// </summary>
         private int nb_items_parsing;
+
+        /// <summary>
+        /// Liste principale de DealabsItem
+        /// </summary>
         private List<DealabsItem> AlllistItems = new List<DealabsItem>();
+
+        /// <summary>
+        /// La date du dernier Item
+        /// </summary>
         public DateTime DateDernierItem;
 
         /// <summary>
@@ -29,10 +46,9 @@ namespace DealabsParser.Parser
         /// </summary>
         /// <param name="url">URL de Dealabs</param>
         /// <param name="nbMinutes"></param>
-        public DealabsRssParser(string url, int nbMinutes, int nb_items_parsing)
+        public DealabsRssParser(string url, int nb_items_parsing)
         {
             this.url = url;
-            this.nbMinutes = nbMinutes;
             this.nb_items_parsing = nb_items_parsing;
         }
 
@@ -44,13 +60,8 @@ namespace DealabsParser.Parser
             log.Debug("Entrée dans la méthode 'updateItem'");
             long TickEntree = DateTime.Now.Ticks;
             List<DealabsItem> retList = new List<DealabsItem>();
-            // On ouvre un stream
-            Stream stream = getStreamRSS();
-
-            // On charge le stream en Xml
-            XmlDocument doc = new XmlDocument();
-            doc.Load(stream);
-            XmlNodeList listItems = doc.GetElementsByTagName("item");
+            
+            XmlNodeList listItems = GetXmlNodeList();
 
             // On se limite en nombre de deals
             int nbItemsMax = nb_items_parsing;
@@ -62,15 +73,7 @@ namespace DealabsParser.Parser
                 DateTime DateFormatted = Convert.ToDateTime(date);
                 if (DateFormatted.CompareTo(DateDernierItem) > 0)
                 {
-                    DealabsItem ItemToAdd = new DealabsItem();
-                    ItemToAdd.UrlDealabs = item.SelectSingleNode("link").InnerText;
-                    ItemToAdd.titre = item.SelectSingleNode("title").InnerText;
-                    ItemToAdd.date = DateFormatted;
-                    ItemToAdd.description = item.SelectSingleNode("description").InnerText;
-                    ItemToAdd.Degre = "NC";
-                    DealabsItemParser ItemParser = new DealabsItemParser(ItemToAdd.UrlDealabs);
-                    ItemToAdd = ItemParser.parserDeal(ItemToAdd);
-                    retList.Add(ItemToAdd);
+                    retList.Add(ParserItem(item));
                 }
                 else
                 {
@@ -90,16 +93,41 @@ namespace DealabsParser.Parser
             // On définit le dernier item daté
             MergerListePrincipale(retList);
             this.DateDernierItem = AlllistItems.ElementAt(0).date;
-            
         }
 
-        private void MergerListePrincipale(List<DealabsItem> tmp)
+        /// <summary>
+        /// Méthode qui renvoie p items qui sont publiés avant la date passée en paramètre
+        /// </summary>
+        /// <param name="dateTime"></param>
+        /// <param name="p"></param>
+        public void ChargerItemAvant(DateTime dateTime, int p)
         {
-            for (int i = tmp.Count - 1; i >= 0; i--)
+            List<DealabsItem> retList = new List<DealabsItem>();
+            XmlNodeList listItems = GetXmlNodeList();
+
+            // On se limite en nombre de deals
+            int nbItemsMax = p;
+            // Pour chaque item
+            foreach (XmlNode item in listItems)
             {
-                this.AlllistItems.Insert(0, tmp.ElementAt(i));
+                // On crée un objet qu'on ajoute dans la liste
+                string date = item.SelectSingleNode("pubDate").InnerText;
+                DateTime DateFormatted = Convert.ToDateTime(date);
+                if (DateFormatted.CompareTo(dateTime) < 0)
+                {
+                    ParserItem(item);
+                    nbItemsMax--;
+                }
+                // Si on a parsé le bon nombre d'items, on arrête.
+                if (nbItemsMax == 0)
+                {
+                    break;
+                }
             }
-            this.AlllistItems = AlllistItems.OrderByDescending(x => x.date).ToList();
+
+            // On définit le dernier item daté
+            MergerListePrincipale(retList);
+            this.DateDernierItem = AlllistItems.ElementAt(0).date;
         }
 
         /// <summary>
@@ -164,6 +192,54 @@ namespace DealabsParser.Parser
         }
 
         /// <summary>
+        /// Méthode qui crée un DealabsItem à partir
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="DateFormatted"></param>
+        /// <returns></returns>
+        private DealabsItem ParserItem(XmlNode item)
+        {
+            DealabsItem ItemToAdd = new DealabsItem();
+            ItemToAdd.UrlDealabs = item.SelectSingleNode("link").InnerText;
+            ItemToAdd.titre = item.SelectSingleNode("title").InnerText;
+            ItemToAdd.date = Convert.ToDateTime(item.SelectSingleNode("pubDate").InnerText);
+            ItemToAdd.description = item.SelectSingleNode("description").InnerText;
+            ItemToAdd.Degre = "NC";
+            DealabsItemParser ItemParser = new DealabsItemParser(ItemToAdd.UrlDealabs);
+            ItemToAdd = ItemParser.parserDeal(ItemToAdd);
+
+            return ItemToAdd;
+        }
+
+        /// <summary>
+        /// Méthode qui renvoie un XmlNodeList à partir du stream Rss
+        /// </summary>
+        /// <returns></returns>
+        private XmlNodeList GetXmlNodeList()
+        {
+            // On ouvre un stream
+            Stream stream = getStreamRSS();
+
+            // On charge le stream en Xml
+            XmlDocument doc = new XmlDocument();
+            doc.Load(stream);
+            return doc.GetElementsByTagName("item");
+        }
+
+        /// <summary>
+        /// Méthode qui merge la liste principale avec une autre liste, puis la trie par date décroissante
+        /// </summary>
+        /// <param name="tmp"></param>
+        private void MergerListePrincipale(List<DealabsItem> tmp)
+        {
+            for (int i = tmp.Count - 1; i >= 0; i--)
+            {
+                this.AlllistItems.Insert(0, tmp.ElementAt(i));
+            }
+            this.AlllistItems = AlllistItems.OrderByDescending(x => x.date).ToList();
+        }
+
+        /// <summary>
         /// Fonction qui filtre les items de la liste principale, et qui renvoie une liste de ces items
         /// </summary>
         /// <param name="filtre">Le filtre correspondant</param>
@@ -196,54 +272,6 @@ namespace DealabsParser.Parser
         {
             WebClient wb = new WebClient();
             return wb.OpenRead(this.url);
-        }
-
-        /// <summary>
-        /// Méthode qui renvoie p items qui sont publiés avant la date passée en paramètre
-        /// </summary>
-        /// <param name="dateTime"></param>
-        /// <param name="p"></param>
-        public void ChargerItemAvant(DateTime dateTime, int p)
-        {
-            List<DealabsItem> retList = new List<DealabsItem>();
-            Stream RssStream = getStreamRSS();
-
-            // On charge le stream en Xml
-            XmlDocument doc = new XmlDocument();
-            doc.Load(RssStream);
-            XmlNodeList listItems = doc.GetElementsByTagName("item");
-
-            // On se limite en nombre de deals
-            int nbItemsMax = p;
-            // Pour chaque item
-            foreach (XmlNode item in listItems)
-            {
-                // On crée un objet qu'on ajoute dans la liste
-                string date = item.SelectSingleNode("pubDate").InnerText;
-                DateTime DateFormatted = Convert.ToDateTime(date);
-                if (DateFormatted.CompareTo(dateTime) < 0)
-                {
-                    DealabsItem ItemToAdd = new DealabsItem();
-                    ItemToAdd.UrlDealabs = item.SelectSingleNode("link").InnerText;
-                    ItemToAdd.titre = item.SelectSingleNode("title").InnerText;
-                    ItemToAdd.date = DateFormatted;
-                    ItemToAdd.description = item.SelectSingleNode("description").InnerText;
-                    ItemToAdd.Degre = "NC";
-                    DealabsItemParser ItemParser = new DealabsItemParser(ItemToAdd.UrlDealabs);
-                    ItemToAdd = ItemParser.parserDeal(ItemToAdd);
-                    retList.Add(ItemToAdd);
-                    nbItemsMax--;
-                }
-                // Si on a parsé 100 items, on arrête.
-                if (nbItemsMax == 0)
-                {
-                    break;
-                }
-            }
-
-            // On définit le dernier item daté
-            MergerListePrincipale(retList);
-            this.DateDernierItem = AlllistItems.ElementAt(0).date;
         }
     }
 }

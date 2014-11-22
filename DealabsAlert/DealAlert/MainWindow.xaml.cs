@@ -42,7 +42,7 @@ namespace DealAlert
             log.Debug("Lancement application");
             InitializeComponent();
             log.Debug("Initialisation configuration");
-            parser = new DealabsRssParser(ConfigurationSettings.AppSettings["url"], Convert.ToInt16(ConfigurationSettings.AppSettings["refreshMinutes"]), Convert.ToInt16(ConfigurationSettings.AppSettings["nombre_items_parsing"]));
+            parser = new DealabsRssParser(ConfigurationSettings.AppSettings["url"], Convert.ToInt16(ConfigurationSettings.AppSettings["nombre_items_parsing"]));
             
             // On fait un premier update
             log.Debug("Premier update Dealabs");

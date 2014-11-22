@@ -8,10 +8,25 @@ namespace DealabsParser.Parser
 {
     public class DealabsItemParser
     {
+        /// <summary>
+        /// Url de la page du deal
+        /// </summary>
         private string Url;
+
+        /// <summary>
+        /// Instance de parser interne
+        /// </summary>
         private Parser NodeParser;
+
+        /// <summary>
+        /// XmlDocument de la page du deal
+        /// </summary>
         private HtmlDocument Document;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="Url"></param>
         public DealabsItemParser(string Url)
         {
             this.Url = Url;
@@ -19,6 +34,11 @@ namespace DealabsParser.Parser
             this.NodeParser = new Parser(this.Document);
         }
 
+        /// <summary>
+        /// Méthode principale publique qui parse les élements
+        /// </summary>
+        /// <param name="Item"></param>
+        /// <returns></returns>
         public DealabsItem parserDeal(DealabsItem Item)
         {
             Item.LinkImage = ParserImage();
@@ -29,6 +49,10 @@ namespace DealabsParser.Parser
             return Item;
         }
 
+        /// <summary>
+        /// Méthode qui parse l'URL de l'image du deal
+        /// </summary>
+        /// <returns></returns>
         private string ParserImage()
         {
             return this.NodeParser.forNode("//meta[@property='og:image']").getAttribute("content");
@@ -81,10 +105,12 @@ namespace DealabsParser.Parser
             return document;
         }
 
+        /// <summary>
+        /// Internal classe servant de parser générique pour les élements du deal
+        /// </summary>
         private class Parser
         {
             private HtmlNode NoeudLien;
-            private string Link;
             private HtmlDocument Document;
 
             internal Parser(HtmlDocument Document)
