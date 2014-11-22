@@ -12,6 +12,7 @@ namespace DealabsParser.Model
         public string description;
         public string LinkImage = string.Empty;
         public string Degre { get; set; }
+        public List<DealabsCommentaire> Commentaires;
 
         public override string ToString()
         {
