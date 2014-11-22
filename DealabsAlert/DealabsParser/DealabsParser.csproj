@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\DealabsCommentaire.cs" />
     <Compile Include="Model\DealabsItem.cs" />
     <Compile Include="Parser\DealabsItemParser.cs" />
     <Compile Include="Parser\DealabsRssParser.cs" />
