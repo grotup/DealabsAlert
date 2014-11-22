@@ -148,7 +148,7 @@ namespace DealAlert
                 ImageDeal.Source = null;
                 Tbk_Code.Text = string.Empty;
 
-                LancerWorkerParsing();
+                //LancerWorkerParsing();
 
                 // On empêche aussi le clic sur le bouton "Ouvrir"
                 btnOuvrirUrl.IsEnabled = true;
@@ -186,22 +186,25 @@ namespace DealAlert
 
         private void UpdateItemAffiche()
         {
-            Tbk_Code.Text = ItemSelectionne.Code;
-            // On cherche à parser l'image seulement si il en a une
-            if (!string.IsNullOrEmpty(ItemSelectionne.LinkImage))
+            if (ItemSelectionne != null)
             {
-                BitmapImage BImageDeal = new BitmapImage();
-                BImageDeal.BeginInit();
-                BImageDeal.UriSource = new Uri(ItemSelectionne.LinkImage, UriKind.Absolute);
-                BImageDeal.EndInit();
-                ImageDeal.Source = BImageDeal;
+                Tbk_Code.Text = ItemSelectionne.Code;
+                // On cherche à parser l'image seulement si il en a une
+                if (!string.IsNullOrEmpty(ItemSelectionne.LinkImage))
+                {
+                    BitmapImage BImageDeal = new BitmapImage();
+                    BImageDeal.BeginInit();
+                    BImageDeal.UriSource = new Uri(ItemSelectionne.LinkImage, UriKind.Absolute);
+                    BImageDeal.EndInit();
+                    ImageDeal.Source = BImageDeal;
+                }
+                else
+                {
+                    ImageDeal.Source = null;
+                }
+                lbHot.Content = ItemSelectionne.Degre;
+                Btn_OuvrirDealExterne.IsEnabled = !string.IsNullOrEmpty(ItemSelectionne.UrlDealabs);
             }
-            else
-            {
-                ImageDeal.Source = null;
-            }
-            lbHot.Content = ItemSelectionne.Degre;
-            Btn_OuvrirDealExterne.IsEnabled = !string.IsNullOrEmpty(ItemSelectionne.UrlDealabs);
         }
 
         private void btnActualiser_Click(object sender, RoutedEventArgs e)
@@ -282,6 +285,22 @@ namespace DealAlert
                 Url = this.ListeAffichee.ElementAt(listBox1.SelectedIndex).UrlDealabs;
             }
             Process.Start(Url);
+        }
+
+        private void LoadMore_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateText.Visibility = Visibility.Visible;
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += worker_LoadMore;
+            worker.WorkerReportsProgress = true;
+            worker.RunWorkerCompleted += worker_UpdateUI;
+            worker.RunWorkerAsync();
+        }
+
+        private void worker_LoadMore(object sender, DoWorkEventArgs e)
+        {
+            parser.ChargerItemAvant(this.ListeAffichee.Last().date, 10);
+            this.ListeAffichee = parser.GetList(string.Empty);
         }
     }
 }

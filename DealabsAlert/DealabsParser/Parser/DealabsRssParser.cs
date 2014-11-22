@@ -52,7 +52,7 @@ namespace DealabsParser.Parser
             doc.Load(stream);
             XmlNodeList listItems = doc.GetElementsByTagName("item");
 
-            // On se limite à 100 deals
+            // On se limite en nombre de deals
             int nbItemsMax = nb_items_parsing;
             // Pour chaque item
             foreach (XmlNode item in listItems)
@@ -99,6 +99,7 @@ namespace DealabsParser.Parser
             {
                 this.AlllistItems.Insert(0, tmp.ElementAt(i));
             }
+            this.AlllistItems = AlllistItems.OrderByDescending(x => x.date).ToList();
         }
 
         /// <summary>
@@ -195,6 +196,54 @@ namespace DealabsParser.Parser
         {
             WebClient wb = new WebClient();
             return wb.OpenRead(this.url);
+        }
+
+        /// <summary>
+        /// Méthode qui renvoie p items qui sont publiés avant la date passée en paramètre
+        /// </summary>
+        /// <param name="dateTime"></param>
+        /// <param name="p"></param>
+        public void ChargerItemAvant(DateTime dateTime, int p)
+        {
+            List<DealabsItem> retList = new List<DealabsItem>();
+            Stream RssStream = getStreamRSS();
+
+            // On charge le stream en Xml
+            XmlDocument doc = new XmlDocument();
+            doc.Load(RssStream);
+            XmlNodeList listItems = doc.GetElementsByTagName("item");
+
+            // On se limite en nombre de deals
+            int nbItemsMax = p;
+            // Pour chaque item
+            foreach (XmlNode item in listItems)
+            {
+                // On crée un objet qu'on ajoute dans la liste
+                string date = item.SelectSingleNode("pubDate").InnerText;
+                DateTime DateFormatted = Convert.ToDateTime(date);
+                if (DateFormatted.CompareTo(dateTime) < 0)
+                {
+                    DealabsItem ItemToAdd = new DealabsItem();
+                    ItemToAdd.UrlDealabs = item.SelectSingleNode("link").InnerText;
+                    ItemToAdd.titre = item.SelectSingleNode("title").InnerText;
+                    ItemToAdd.date = DateFormatted;
+                    ItemToAdd.description = item.SelectSingleNode("description").InnerText;
+                    ItemToAdd.Degre = "NC";
+                    DealabsItemParser ItemParser = new DealabsItemParser(ItemToAdd.UrlDealabs);
+                    ItemToAdd = ItemParser.parserDeal(ItemToAdd);
+                    retList.Add(ItemToAdd);
+                    nbItemsMax--;
+                }
+                // Si on a parsé 100 items, on arrête.
+                if (nbItemsMax == 0)
+                {
+                    break;
+                }
+            }
+
+            // On définit le dernier item daté
+            MergerListePrincipale(retList);
+            this.DateDernierItem = AlllistItems.ElementAt(0).date;
         }
     }
 }
