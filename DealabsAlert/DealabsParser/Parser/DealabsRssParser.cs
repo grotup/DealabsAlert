@@ -67,6 +67,9 @@ namespace DealabsParser.Parser
                     ItemToAdd.titre = item.SelectSingleNode("title").InnerText;
                     ItemToAdd.date = DateFormatted;
                     ItemToAdd.description = item.SelectSingleNode("description").InnerText;
+                    ItemToAdd.Degre = "NC";
+                    DealabsItemParser ItemParser = new DealabsItemParser(ItemToAdd.UrlDealabs);
+                    ItemToAdd = ItemParser.parserDeal(ItemToAdd);
                     retList.Add(ItemToAdd);
                 }
                 else
