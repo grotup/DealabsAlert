@@ -23,6 +23,17 @@ namespace DealabsParser.Parser
         /// </summary>
         private HtmlDocument Document;
 
+        private string _XPathImage = "//div[@id='floatant_title']/div[@class='structure']/div[@class='image_part']/div[@class='image_contener']/img";
+        private string _AttributeImage = "src";
+
+        private string _XPathUrlDeal = "//a[@class='voirledeal']";
+        private string _AttributeUrlDeal = "href";
+
+        private string _XPathCode = "//input[(@class='voucher_code')]";
+        private string _AttributeCode = "value";
+
+        private string _XPathTemperature = "//div[starts-with(@class,'temperature_div ')]/p";
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -55,7 +66,10 @@ namespace DealabsParser.Parser
         /// <returns></returns>
         private string ParserImage()
         {
-            return this.NodeParser.forNode("//meta[@property='og:image']").getAttribute("content");
+            // //div[@id='floatant_title']/div[@class='structure]/div[@class='image_part']/div[@class='image_contener']/img
+            return this.NodeParser
+                .forNode(_XPathImage)
+                .getAttribute(_AttributeImage);
         }
 
         /// <summary>
@@ -64,7 +78,9 @@ namespace DealabsParser.Parser
         /// <returns>L'URL du deal</returns>
         private string ParserUrlDeal()
         {
-            return NodeParser.forNode("//a[@class='voirledeal']").getAttribute("href");
+            return this.NodeParser
+                .forNode(_XPathUrlDeal)
+                .getAttribute(_AttributeUrlDeal);
         }
 
         /// <summary>
@@ -73,7 +89,9 @@ namespace DealabsParser.Parser
         /// <returns>Le code du deal</returns>
         private string ParserCode()
         {
-            return NodeParser.forNode("//input[(@class='voucher_code')]").getAttribute("value");
+            return NodeParser
+                .forNode(_XPathCode)
+                .getAttribute(_AttributeCode);
         }
 
         /// <summary>
@@ -82,7 +100,7 @@ namespace DealabsParser.Parser
         /// <returns>La "chaleur" du deal</returns>
         private string ParserDegre()
         {
-            string value = NodeParser.forNode("//div[starts-with(@class,'temperature_div ')]/p").getInnerText();
+            string value = NodeParser.forNode(_XPathTemperature).getInnerText();
 
             string[] Tab = value.Split(';');
             for (int i = 0; i < Tab.Length; i++)
