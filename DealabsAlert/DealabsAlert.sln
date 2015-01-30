@@ -1,13 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DealAlert", "DealAlert\DealAlert.csproj", "{16748D4F-3B38-4323-9E28-EC7A552FAFA6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DealabsAlertTest", "DealabsAlertTest\DealabsAlertTest.csproj", "{406AA393-996C-431C-9E93-0948D26DCFC3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DealabsParser", "DealabsParser\DealabsParser.csproj", "{6A913001-8DAD-4B6D-BC92-1B94797B70D6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{B438ABC5-C42E-44F7-9472-4E9422A73493}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DealabsDatabase", "DealabsDatabase\DealabsDatabase.csproj", "{FB48D79A-2323-47BA-A030-9CFCEBCB1D6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +56,16 @@ Global
 		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{6A913001-8DAD-4B6D-BC92-1B94797B70D6}.Release|x86.ActiveCfg = Release|Any CPU
+		{FB48D79A-2323-47BA-A030-9CFCEBCB1D6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB48D79A-2323-47BA-A030-9CFCEBCB1D6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB48D79A-2323-47BA-A030-9CFCEBCB1D6A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{FB48D79A-2323-47BA-A030-9CFCEBCB1D6A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{FB48D79A-2323-47BA-A030-9CFCEBCB1D6A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FB48D79A-2323-47BA-A030-9CFCEBCB1D6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB48D79A-2323-47BA-A030-9CFCEBCB1D6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB48D79A-2323-47BA-A030-9CFCEBCB1D6A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{FB48D79A-2323-47BA-A030-9CFCEBCB1D6A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{FB48D79A-2323-47BA-A030-9CFCEBCB1D6A}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

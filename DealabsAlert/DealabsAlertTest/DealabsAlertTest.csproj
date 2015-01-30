@@ -50,6 +50,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Database\UnitTest1.cs" />
     <Compile Include="DealabsItem\DealabsItemTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -59,6 +60,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DealabsDatabase\DealabsDatabase.csproj">
+      <Project>{fb48d79a-2323-47ba-a030-9cfcebcb1d6a}</Project>
+      <Name>DealabsDatabase</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DealabsParser\DealabsParser.csproj">
       <Project>{6a913001-8dad-4b6d-bc92-1b94797b70d6}</Project>
       <Name>DealabsParser</Name>
